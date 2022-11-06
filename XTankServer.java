@@ -1,5 +1,6 @@
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.Executors;
@@ -7,6 +8,8 @@ import java.net.InetAddress;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 /**
  * When a client connects, a new thread is started to handle it.
@@ -14,19 +17,22 @@ import java.util.ArrayList;
 public class XTankServer 
 {
 	static ArrayList<DataOutputStream> sq;
+
 	
     public static void main(String[] args) throws Exception 
     {
 		System.out.println(InetAddress.getLocalHost());
 		sq = new ArrayList<>();
 		
-        try (var listener = new ServerSocket(59896)) 
+        try (var listener = new ServerSocket(59895)) 
         {
             System.out.println("The XTank server is running...");
             var pool = Executors.newFixedThreadPool(20);
+            Game game = new Game();
             while (true) 
             {
-                pool.execute(new XTankManager(listener.accept()));
+                Player player = new Player("Test", 0, (int)(Math.random()*1000));
+                pool.execute(new XTankManager(listener.accept(), player, game));
             }
         }
     }
@@ -34,8 +40,15 @@ public class XTankServer
     private static class XTankManager implements Runnable 
     {
         private Socket socket;
+        private Player currentPlayer;
+        private Game game;
 
-        XTankManager(Socket socket) { this.socket = socket; }
+        XTankManager(Socket socket, Player player, Game game) 
+        {
+            this.socket = socket;
+            this.currentPlayer = player;
+            this.game = game;
+        }
 
         @Override
         public void run() 
@@ -45,17 +58,33 @@ public class XTankServer
             {
             	DataInputStream in = new DataInputStream(socket.getInputStream());
             	DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+                Scanner scanner = new Scanner(in);
+                PrintWriter outWriter = new PrintWriter(socket.getOutputStream(), true);
                 sq.add(out);
-                int ycoord;
+                int currid = currentPlayer.getID();
+                int randX = (int)(Math.random()*500);
+                int randY = (int)(Math.random()*500);
+                currentPlayer.setX(randX);
+                currentPlayer.setY(randY);
+                outWriter.println("YOURID: " + currid + " X: " + randX + " Y: " + randY);
+
                 while (true)
                 {
-                	ycoord = in.readInt();
-                	//System.out.println("ycoord = " + ycoord);
+					if (in.available() > 0) {
+                        String line = scanner.nextLine();
+                        System.out.println(line);
+                        String[] parts = line.split(" ");
+					String status = parts[0];
+					int tmpid = Integer.parseInt(parts[1]);
+					int x = Integer.parseInt(parts[3]);
+					int y = Integer.parseInt(parts[5]);
                 	for (DataOutputStream o: sq)
                 	{
-                    	//System.out.println("o = " + o);
-    					o.writeInt(ycoord);
+                    	PrintWriter outWriter2 = new PrintWriter(o, true);
+                    	outWriter2.println("ID: " + tmpid + " X: " + x + " Y: " + y);
                 	}
+                    }
+					
                 }
             } 
             catch (Exception e) 
@@ -70,6 +99,60 @@ public class XTankServer
             }
         }
     }
+
+    // implement the Player class here
+
+    private static class Player 
+    {
+        private String name;
+        private int score;
+        private int id;
+        private int x;
+        private int y;
+
+        public Player(String name, int score, int id) 
+        {
+            this.name = name;
+            this.score = score;
+            this.id = id;
+        }
+
+        public String getName() { return name; }
+        public int getScore() { return score; }
+        public int getID() { return id; }
+        public int getX() { return x; }
+        public int getY() { return y; }
+        public void setX(int x) { this.x = x; }
+        public void setY(int y) { this.y = y; }
+    }
+
+    private static class Game 
+    {
+        private List<Player> players;
+
+        public Game() 
+        {
+            players = new ArrayList<>();
+        }
+
+        public void addPlayer(Player player) 
+        {
+            players.add(player);
+        }
+
+        public void removePlayer(Player player) 
+        {
+            players.remove(player);
+        }
+
+        public List<Player> getPlayers() 
+        {
+            return players;
+        }
+    }
+
+
+
     
 }
 
