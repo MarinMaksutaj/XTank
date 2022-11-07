@@ -26,6 +26,7 @@ public class XTankUI
 	private Canvas canvas;
 	private Display display;
 	private List<Bullet> bulletsList;
+	private List<Bullet> enemyBulletsList;
 	
 	
 	DataInputStream in; 
@@ -38,6 +39,7 @@ public class XTankUI
 		this.id = -1;
 		this.enemyTanks = new HashMap<>();
 		this.bulletsList = new ArrayList<>();
+		this.enemyBulletsList = new ArrayList<>();
 	}
 	
 	public void start()
@@ -76,6 +78,13 @@ public class XTankUI
 				event.gc.fillRectangle( bullet.getX(), bullet.getY(), 10, 10);
 				
 			}
+			
+			for (int i = 0; i < enemyBulletsList.size(); i++) {
+				Bullet bullet = enemyBulletsList.get(i);
+				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_RED));
+				event.gc.fillRectangle( bullet.getX(), bullet.getY(), 10, 10);
+				
+			}
 	
 		}
 			
@@ -96,9 +105,15 @@ public class XTankUI
 				// update tank location
 				
 				if(e.keyCode == 32) {
-					
-					Bullet bullet = new Bullet(x + 20, y - 30); 
+					Bullet bullet = new Bullet(x + 20, y - 30, id); 
 					bulletsList.add(bullet);
+					
+					try {
+						out.println("BULLET: "+bullet.getId() + " X: " + bullet.getX() + " Y: " + bullet.getY());
+					}
+					catch(Exception ex) {
+						System.out.println("The server did not respond (write KL).");
+					}
 					
 					Timer timer = new Timer();
 					timer.scheduleAtFixedRate(new TimerTask() {
@@ -107,27 +122,24 @@ public class XTankUI
 	                        Display.getDefault().asyncExec(new Runnable() {
 	                            public void run() {
 	                            	
-									if(bullet.getY() > 0) {
-										bullet.incrementY();
-										canvas.redraw();
-										
-									} else {
+	                            	bullet.incrementY();
+									canvas.redraw();
+									
+									
+	                            	
+									if(bullet.getY() <= -10) {
 										bulletsList.remove(bullet);
 										timer.cancel();
+										canvas.redraw();
 									}
 	                            }
 	                        });
 	                    }
-	                },0,1000);
+	                },0,50);
 										
 					
-					try {
-						out.println("ID: " + id + " X: " + x + " Y: " + y);
-					}
-					catch(Exception ex) {
-						System.out.println("The server did not respond (write KL).");
-					}
-					canvas.redraw();
+					
+					
 					
 				} 
 				
@@ -154,6 +166,7 @@ public class XTankUI
 					y += directionY;
 					
 					try {
+						
 						out.println("ID: " + id + " X: " + x + " Y: " + y);
 					}
 					catch(Exception ex) {
@@ -192,7 +205,6 @@ public class XTankUI
 			try {
 				if (in.available() > 0) {
 					Scanner sin = new Scanner(in);
-					System.out.println("testing!!");
 					String line = sin.nextLine();
 					if (line == "") {
 						System.out.println("The server did not respond (read KL).");
@@ -220,12 +232,40 @@ public class XTankUI
 						System.out.println("Enemy count: " + enemyTanks.size());
 						canvas.redraw();
 					}
+					
+					else if (status.equals("BULLET:") && id != tmpid)
+					{
+						Bullet bullet = new Bullet(x,y,tmpid);
+						enemyBulletsList.add(bullet);
+						
+						Timer timer = new Timer();
+						timer.scheduleAtFixedRate(new TimerTask() {
+		                    @Override
+		                    public void run() {
+		                        Display.getDefault().asyncExec(new Runnable() {
+		                            public void run() {
+		                            	
+		                            	bullet.incrementY();
+										canvas.redraw();
+								
+										if(bullet.getY() <= -10) {
+											enemyBulletsList.remove(bullet);
+											timer.cancel();
+											canvas.redraw();
+										}
+		                            }
+		                        });
+		                    }
+		                },0,50);
+						
+						canvas.redraw();
+					}
 				}
 			}
 			catch(Exception ex) {
 				System.out.println("The server did not respond (async).");
 			}				
-            display.timerExec(150, this);
+            display.timerExec(1, this);
 		}
 	};	
 	
@@ -234,11 +274,13 @@ public class XTankUI
 		 
 		 private int x;
 		 private int y;
+		 private int id;
 		 
 		
-		 public Bullet(int x, int y) {
+		 public Bullet(int x, int y, int id) {
 			 this.x = x;
 			 this.y =y;
+			 this.id = id; 
 		 }
 		 
 		 public int getX() {
@@ -249,9 +291,18 @@ public class XTankUI
 			 return y; 
 		 }
 		 
+		 public int getId() {
+			 return id; 
+		 }
+		 
 		 public void incrementY() {
 			 y=y-10;
 		 }
+		 
+		 public void setY(int y) {
+			 this.y=y;
+		 }
+		 
 	}
 }
 

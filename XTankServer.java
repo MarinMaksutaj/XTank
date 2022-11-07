@@ -72,16 +72,10 @@ public class XTankServer
                 {
 					if (in.available() > 0) {
                         String line = scanner.nextLine();
-                        System.out.println(line);
-                        String[] parts = line.split(" ");
-					String status = parts[0];
-					int tmpid = Integer.parseInt(parts[1]);
-					int x = Integer.parseInt(parts[3]);
-					int y = Integer.parseInt(parts[5]);
                 	for (DataOutputStream o: sq)
                 	{
-                    	PrintWriter outWriter2 = new PrintWriter(o, true);
-                    	outWriter2.println("ID: " + tmpid + " X: " + x + " Y: " + y);
+                		PrintWriter outWriter2 = new PrintWriter(o, true);
+    						outWriter2.println(line);
                 	}
                     }
 					
