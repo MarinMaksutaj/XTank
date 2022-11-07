@@ -1,15 +1,17 @@
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.*;
-import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
+import java.util.List;
+import java.util.ArrayList;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Scanner;
 
 public class XTankUI
@@ -23,6 +25,8 @@ public class XTankUI
 	private int directionY = -10;
 	private Canvas canvas;
 	private Display display;
+	private List<Bullet> bulletsList;
+	
 	
 	DataInputStream in; 
 	PrintWriter out;
@@ -33,6 +37,7 @@ public class XTankUI
 		this.out = new PrintWriter(out, true);
 		this.id = -1;
 		this.enemyTanks = new HashMap<>();
+		this.bulletsList = new ArrayList<>();
 	}
 	
 	public void start()
@@ -64,7 +69,18 @@ public class XTankUI
 				event.gc.setLineWidth(4);
 				event.gc.drawLine(enemyTank[0]+25, enemyTank[1]+25, enemyTank[0]+25, enemyTank[1]-15);
 			}
-		});	
+			
+			for (int i = 0; i < bulletsList.size(); i++) {
+				Bullet bullet = bulletsList.get(i);
+				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+				event.gc.fillRectangle( bullet.getX(), bullet.getY(), 10, 10);
+				
+			}
+	
+		}
+			
+			
+		);	
 
 		canvas.addMouseListener(new MouseListener() {
 			public void mouseDown(MouseEvent e) {
@@ -78,29 +94,81 @@ public class XTankUI
 			public void keyPressed(KeyEvent e) {
 				System.out.println("key " + e.keyCode + " pressed");
 				// update tank location
-				if (e.keyCode == SWT.ARROW_UP) {
-					directionX = 0;
-					directionY = -10;
-				} else if (e.keyCode == SWT.ARROW_DOWN) {
-					directionX = 0;
-					directionY = 10;
-				} else if (e.keyCode == SWT.ARROW_LEFT) {
-					directionX = -10;
-					directionY = 0;
-				} else if (e.keyCode == SWT.ARROW_RIGHT) {
-					directionX = 10;
-					directionY = 0;
-				}
-				x += directionX;
-				y += directionY;
-				try {
-					out.println("ID: " + id + " X: " + x + " Y: " + y);
-				}
-				catch(Exception ex) {
-					System.out.println("The server did not respond (write KL).");
-				}
+				
+				if(e.keyCode == 32) {
+					
+					Bullet bullet = new Bullet(x + 20, y - 30); 
+					bulletsList.add(bullet);
+					
+					Timer timer = new Timer();
+					timer.scheduleAtFixedRate(new TimerTask() {
+	                    @Override
+	                    public void run() {
+	                        Display.getDefault().asyncExec(new Runnable() {
+	                            public void run() {
+	                            	
+									if(bullet.getY() > 0) {
+										bullet.incrementY();
+										canvas.redraw();
+										
+									} else {
+										bulletsList.remove(bullet);
+										timer.cancel();
+									}
+	                            }
+	                        });
+	                    }
+	                },0,1000);
+										
+					
+					try {
+						out.println("ID: " + id + " X: " + x + " Y: " + y);
+					}
+					catch(Exception ex) {
+						System.out.println("The server did not respond (write KL).");
+					}
+					canvas.redraw();
+					
+				} 
+				
+				else if(e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_DOWN || e.keyCode == SWT.ARROW_LEFT || e.keyCode == SWT.ARROW_RIGHT) {
+					
+					if (e.keyCode == SWT.ARROW_UP) {
+						directionX = 0;
+						directionY = -10;
+					} else if (e.keyCode == SWT.ARROW_DOWN) {
+						directionX = 0;
+						directionY = 10;
+						
+					} else if (e.keyCode == SWT.ARROW_LEFT) {
+						directionX = -10;
+						directionY = 0;
+						
+					} else if (e.keyCode == SWT.ARROW_RIGHT) {
+						directionX = 10;
+						directionY = 0;
+						
+					} 
+					
+					x += directionX;
+					y += directionY;
+					
+					try {
+						out.println("ID: " + id + " X: " + x + " Y: " + y);
+					}
+					catch(Exception ex) {
+						System.out.println("The server did not respond (write KL).");
+					}
+					canvas.redraw();
+					
 
-				canvas.redraw();
+					
+				}
+				
+				
+				
+
+				
 			}
 			public void keyReleased(KeyEvent e) {}
 		});
@@ -160,6 +228,31 @@ public class XTankUI
             display.timerExec(150, this);
 		}
 	};	
+	
+	
+	 class Bullet{
+		 
+		 private int x;
+		 private int y;
+		 
+		
+		 public Bullet(int x, int y) {
+			 this.x = x;
+			 this.y =y;
+		 }
+		 
+		 public int getX() {
+			 return x; 
+		 }
+		 
+		 public int getY() {
+			 return y; 
+		 }
+		 
+		 public void incrementY() {
+			 y=y-10;
+		 }
+	}
 }
 
 
