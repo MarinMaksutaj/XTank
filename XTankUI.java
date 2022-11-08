@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -27,7 +29,8 @@ public class XTankUI
 	private Display display;
 	private List<Bullet> bulletsList;
 	private List<Bullet> enemyBulletsList;
-	
+	private Set<Coordinate> filledCoordsTank;
+	private Set<Coordinate> filledCoordsBullet;
 	
 	DataInputStream in; 
 	PrintWriter out;
@@ -40,7 +43,49 @@ public class XTankUI
 		this.enemyTanks = new HashMap<>();
 		this.bulletsList = new ArrayList<>();
 		this.enemyBulletsList = new ArrayList<>();
+		this.filledCoordsTank = new HashSet<>();
+		this.filledCoordsBullet = new HashSet<>();
+		
 	}
+	
+	private void fillCoords(int x, int y, String type) {
+		
+		if(type.equals("Tank")) {
+			for(int i =x; i <=x+50; i++) {
+				for(int j = y ; j <= y+100; j++) {
+				Coordinate toAdd = new Coordinate(i,j);
+				filledCoordsTank.add(toAdd);
+			}}
+		}else {
+			for(int i =x; i <=x+10; i++) {
+				for(int j = y ; j <= y+10; j++) {
+				Coordinate toAdd = new Coordinate(i,j);
+				filledCoordsBullet.add(toAdd);
+			}}	
+		}
+		
+	}
+	
+	public boolean isCollision() {
+			
+		 	boolean flag = false;
+		 	
+		 	for(Coordinate bulletCoord: filledCoordsBullet) {
+		 		for(Coordinate tankCoord: filledCoordsTank) {
+		 			
+		 			if(tankCoord.getCoord()[0] == bulletCoord.getCoord()[0] && 
+		 					tankCoord.getCoord()[1] == bulletCoord.getCoord()[1])
+		 			{flag = true;}
+		 		}
+		 	}
+		 	
+		 	
+		 	return flag;
+			
+			
+		}
+	
+
 	
 	public void start()
 	{
@@ -51,8 +96,12 @@ public class XTankUI
 		shell.setLayout(new FillLayout());
 
 		canvas = new Canvas(shell, SWT.NO_BACKGROUND);
+	
 
 		canvas.addPaintListener(event -> {
+			
+			this.filledCoordsTank.clear();
+			
 			event.gc.fillRectangle(canvas.getBounds());
 			event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_DARK_GREEN));
 			event.gc.fillRectangle(x, y, 50, 100);
@@ -60,7 +109,9 @@ public class XTankUI
 			event.gc.fillOval(x, y+25, 50, 50);
 			event.gc.setLineWidth(4);
 			event.gc.drawLine(x+25, y+25, x+25, y-15);
-
+			
+			fillCoords(x,y, "Tank");
+	
 			// draw the enemy tanks
 			for (Integer[] enemyTank : enemyTanks.values())
 			{
@@ -70,26 +121,46 @@ public class XTankUI
 				event.gc.fillOval(enemyTank[0], enemyTank[1]+25, 50, 50);
 				event.gc.setLineWidth(4);
 				event.gc.drawLine(enemyTank[0]+25, enemyTank[1]+25, enemyTank[0]+25, enemyTank[1]-15);
+				
+				fillCoords(enemyTank[0], enemyTank[1], "Tank");
 			}
 			
 			for (int i = 0; i < bulletsList.size(); i++) {
+	
 				Bullet bullet = bulletsList.get(i);
+				
+				this.filledCoordsBullet.clear();
+				fillCoords(bullet.getX(), bullet.getY(), "Bullet");
+				
+				
 				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 				event.gc.fillRectangle( bullet.getX(), bullet.getY(), 10, 10);
+				
+				if(isCollision()) {
+					bulletsList.remove(i);
+				}
 				
 			}
 			
 			for (int i = 0; i < enemyBulletsList.size(); i++) {
+				
 				Bullet bullet = enemyBulletsList.get(i);
+				
+				this.filledCoordsBullet.clear();
+				fillCoords(bullet.getX(), bullet.getY(), "Bullet");
+				
 				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_RED));
 				event.gc.fillRectangle( bullet.getX(), bullet.getY(), 10, 10);
 				
+				if(isCollision()) {
+					enemyBulletsList.remove(i);
+				}
+				
 			}
 	
-		}
-			
-			
+		}	
 		);	
+		
 
 		canvas.addMouseListener(new MouseListener() {
 			public void mouseDown(MouseEvent e) {
@@ -299,10 +370,28 @@ public class XTankUI
 			 y=y-10;
 		 }
 		 
-		 public void setY(int y) {
-			 this.y=y;
+		 
+	}
+	 
+	class Coordinate{
+		private int coordinates [] = new int [2];
+		
+		public Coordinate(int x, int y) {
+			 this.coordinates[0] = x;
+			 this.coordinates[1] = y;
+		 }
+		
+		 
+		 public int[] getCoord() {
+			 return coordinates; 
 		 }
 		 
+		 public void setCoord(int x, int y) {
+			 this.coordinates[0] = x;
+			 this.coordinates[1] = y;
+		 }
+		 
+		
 	}
 }
 
