@@ -33,6 +33,9 @@ public class XTankUI
 	private Set<Coordinate> filledCoordsMyTank;
 	private Set<Coordinate> filledCoordsEnemyTank;
 	private Set<Coordinate> filledCoordsBullet;
+
+	// keep track of the tank direction
+	private int tankDirection = 0; // 0 = up, 1 = right, 2 = down, 3 = left
 	
 	DataInputStream in; 
 	PrintWriter out;
@@ -48,7 +51,24 @@ public class XTankUI
 		this.filledCoordsMyTank = new HashSet<>();
 		this.filledCoordsEnemyTank = new HashSet<>();
 		this.filledCoordsBullet = new HashSet<>();
+		this.tankDirection = 0;
 		
+	}
+
+	private int getBulletDirection(Bullet bullet) {
+		// look at the bullet's id and return the direction of the tank that fired it
+		int id = bullet.getId();
+		// check the current tank first
+		if(id == this.id) {
+			return tankDirection;
+		}
+		// check the other tanks
+		for(Integer key : enemyTanks.keySet()) {
+			if(key == id) {
+				return enemyTanks.get(key)[2];
+			}
+		}
+		return -1;
 	}
 	
 	private void fillCoords(int x, int y, String type) {
@@ -127,7 +147,7 @@ public class XTankUI
 		GridLayout gridLayout = new GridLayout();
         shell.setLayout( gridLayout);
         
-        shell.setSize(800,700);
+        shell.setSize(800,850);
         
         Text healthText = new Text(shell, SWT.READ_ONLY | SWT.BORDER);
         healthText.setText("Health: " + health);
@@ -141,7 +161,7 @@ public class XTankUI
 		
         
         canvas = new Canvas(upperComp, SWT.NONE);
-        canvas.setSize(800,500);
+        canvas.setSize(800,650); // increased this a little bit 
         
 //        Canvas lowerCanvas = new Canvas(lowerComp, SWT.NONE);
 //        canvas.setSize(800,200);
@@ -158,7 +178,19 @@ public class XTankUI
 				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_BLACK));
 				event.gc.fillOval(x, y+25, 50, 50);
 				event.gc.setLineWidth(4);
-				event.gc.drawLine(x+25, y+25, x+25, y-15);
+				// draw the line based on the direction
+				if(tankDirection == 0) {
+					event.gc.drawLine(x+25, y+25, x+25, y-25);
+				} else if(tankDirection == 1) {
+					// down
+					event.gc.drawLine(x+25, y+75, x+25, y+125);
+				} else if(tankDirection == 2) {
+					// draw line to the left
+					event.gc.drawLine(x, y + 50, x - 25, y + 50);
+				} else if(tankDirection == 3) {
+					// draw line to the right
+					event.gc.drawLine(x+50, y+50, x+75, y+50);
+				}
 				
 				this.filledCoordsMyTank.clear();
 				fillCoords(x,y, "My Tank");
@@ -177,7 +209,19 @@ public class XTankUI
 				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_BLACK));
 				event.gc.fillOval(enemyTank[0], enemyTank[1]+25, 50, 50);
 				event.gc.setLineWidth(4);
-				event.gc.drawLine(enemyTank[0]+25, enemyTank[1]+25, enemyTank[0]+25, enemyTank[1]-15);
+				// draw the line based on the direction
+				if(enemyTank[2] == 0) {
+					event.gc.drawLine(enemyTank[0]+25, enemyTank[1]+25, enemyTank[0]+25, enemyTank[1]-25);
+				} else if(enemyTank[2] == 1) {
+					// down
+					event.gc.drawLine(enemyTank[0]+25, enemyTank[1]+75, enemyTank[0]+25, enemyTank[1]+125);
+				} else if(enemyTank[2] == 2) {
+					// draw line to the left
+					event.gc.drawLine(enemyTank[0], enemyTank[1] + 50, enemyTank[0] - 25, enemyTank[1] + 50);
+				} else if(enemyTank[2] == 3) {
+					// draw line to the right
+					event.gc.drawLine(enemyTank[0]+50, enemyTank[1]+50, enemyTank[0]+75, enemyTank[1]+50);
+				}
 				
 				fillCoords(enemyTank[0], enemyTank[1], "Tank");
 			}
@@ -187,6 +231,11 @@ public class XTankUI
 				for (int i = 0; i < bulletsList.size(); i++) {
 					
 					Bullet bullet = bulletsList.get(i);
+
+					// if the bullet is out of bounds, remove it
+					if(bullet.getX() < 0 || bullet.getX() > 800 || bullet.getY() < 0 || bullet.getY() > 650) {	
+						continue; // TODO: remove the bullet from the list
+					}
 					
 					this.filledCoordsBullet.clear();
 					fillCoords(bullet.getX(), bullet.getY(), "Bullet");
@@ -206,7 +255,10 @@ public class XTankUI
 			for (int i = 0; i < enemyBulletsList.size(); i++) {
 				
 				Bullet bullet = enemyBulletsList.get(i);
-				
+				// if the bullet is out of bounds, remove it
+				if(bullet.getX() < 0 || bullet.getX() > 800 || bullet.getY() < 0 || bullet.getY() > 650) {
+					continue; // TODO: ideally, remove the bullet from the list
+				}
 				this.filledCoordsBullet.clear();
 				fillCoords(bullet.getX(), bullet.getY(), "Bullet");
 				
@@ -261,11 +313,13 @@ public class XTankUI
 				// update tank location
 				
 				if(e.keyCode == 32) {
-					Bullet bullet = new Bullet(x + 20, y - 30, id); 
-					bulletsList.add(bullet);
 					
+					Bullet bullet = new Bullet(x + 20, y - 30, id, 0);
+					int bulletDir = getBulletDirection(bullet);
+					bullet.setDirection(bulletDir);
+					bulletsList.add(bullet);
 					try {
-						out.println("BULLET: "+bullet.getId() + " X: " + bullet.getX() + " Y: " + bullet.getY());
+						out.println("BULLET: "+bullet.getId() + " X: " + bullet.getX() + " Y: " + bullet.getY() + " D: " + bulletDir);
 					}
 					catch(Exception ex) {
 						System.out.println("The server did not respond (write KL).");
@@ -297,31 +351,50 @@ public class XTankUI
 					
 				} 
 				
-				else if(e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_DOWN || e.keyCode == SWT.ARROW_LEFT || e.keyCode == SWT.ARROW_RIGHT) {
+				else if(e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_DOWN || e.keyCode == SWT.ARROW_LEFT || e.keyCode == SWT.ARROW_RIGHT || e.keyCode == 119 || e.keyCode == 115 || e.keyCode == 97 || e.keyCode == 100) {
 					
 					if (e.keyCode == SWT.ARROW_UP) {
 						directionX = 0;
 						directionY = -10;
+						x += directionX;
+						y += directionY;
 					} else if (e.keyCode == SWT.ARROW_DOWN) {
 						directionX = 0;
 						directionY = 10;
+						x += directionX;
+						y += directionY;
 						
 					} else if (e.keyCode == SWT.ARROW_LEFT) {
 						directionX = -10;
 						directionY = 0;
+						x += directionX;
+						y += directionY;
 						
 					} else if (e.keyCode == SWT.ARROW_RIGHT) {
 						directionX = 10;
 						directionY = 0;
-						
+						x += directionX;
+						y += directionY;
 					} 
-					
-					x += directionX;
-					y += directionY;
-					
+
+					// check if keys are wasd, and if so, change direction
+					if (e.keyCode == 119) {
+						System.out.println("W was pressed");
+						tankDirection = 0;
+					} else if (e.keyCode == 115) {
+						tankDirection = 1;
+						
+					} else if (e.keyCode == 97) {
+						tankDirection = 2;
+						
+					} else if (e.keyCode == 100) {
+						tankDirection = 3;
+					}
+
+
 					try {
 						
-						out.println("ID: " + id + " X: " + x + " Y: " + y);
+						out.println("ID: " + id + " X: " + x + " Y: " + y + " D: " + tankDirection);
 					}
 					catch(Exception ex) {
 						System.out.println("The server did not respond (write KL).");
@@ -366,30 +439,32 @@ public class XTankUI
 					}
 					System.out.println(line);
 					// update tank location
-					// current format: "YOURID: 1 X: 300 Y: 500"
-					// or "ENEMYID: 1 X: 300 Y: 500"
+					// current format: "YOURID: 1 X: 300 Y: 500 D: 0"
+					// or "ENEMYID: 1 X: 300 Y: 500 D: 0"
 					String[] parts = line.split(" ");
 					String status = parts[0];
 					int tmpid = Integer.parseInt(parts[1]);
 					int x = Integer.parseInt(parts[3]);
 					int y = Integer.parseInt(parts[5]);
+					int d = Integer.parseInt(parts[7]);
 					if (status.equals("YOURID:"))
 					{
 						id = tmpid;
 						XTankUI.this.x = x;
 						XTankUI.this.y = y;
+						tankDirection = d;
 						canvas.redraw();
 					}
 					else if (status.equals("ID:") && id != tmpid)
 					{
-						enemyTanks.put(tmpid, new Integer[] {x, y});
+						enemyTanks.put(tmpid, new Integer[] {x, y, d});
 						System.out.println("Enemy count: " + enemyTanks.size());
 						canvas.redraw();
 					}
 					
 					else if (status.equals("BULLET:") && id != tmpid)
 					{
-						Bullet bullet = new Bullet(x,y,tmpid);
+						Bullet bullet = new Bullet(x,y,tmpid, d);
 						enemyBulletsList.add(bullet);
 						
 						Timer timer = new Timer();
@@ -435,12 +510,14 @@ public class XTankUI
 		 private int x;
 		 private int y;
 		 private int id;
+		 private int direction;
 		 
 		
-		 public Bullet(int x, int y, int id) {
+		 public Bullet(int x, int y, int id, int direction) {
 			 this.x = x;
 			 this.y =y;
 			 this.id = id; 
+			 this.direction = direction;
 		 }
 		 
 		 public int getX() {
@@ -454,9 +531,44 @@ public class XTankUI
 		 public int getId() {
 			 return id; 
 		 }
+
+		 public int getDirection() {
+			 return direction; 
+		 }
+
+		 public void setDirection(int direction) {
+			 this.direction = direction;
+			 if (direction == 0) {
+				 this.y = this.y - 10;
+			 }
+			 else if (direction == 1) {
+				this.y = this.y + 150;
+			 }
+			 else if (direction == 2) {
+				 this.y = this.y + 75;
+				 this.x = this.x - 50;
+			 }
+			 else if (direction == 3) {
+				this.y = this.y + 75;
+				this.x = this.x + 50;
+			 } 
+		 }
 		 
 		 public void incrementY() {
-			 y=y-10;
+			 // based on direction change x and y	
+			 if (direction == 0) {
+				 y -= 10;
+			 }
+			 else if (direction == 1) {
+				 y += 10;
+			 }
+			 else if (direction == 2) {
+				 x -= 10;
+			 }
+			 else if (direction == 3) {
+				 x += 10;
+			 }
+
 		 }
 		 
 		 
