@@ -67,7 +67,6 @@ public class XTankServer
                 currentPlayer.setX(randX);
                 currentPlayer.setY(randY);
                 outWriter.println("YOURID: " + currid + " X: " + randX + " Y: " + randY + " D: " + 0);
-
                 while (true)
                 {
 					if (in.available() > 0) {

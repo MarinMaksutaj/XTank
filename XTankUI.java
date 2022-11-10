@@ -5,7 +5,9 @@ import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.List;
+import java.util.Arrays;  
 import java.util.ArrayList;
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -23,6 +25,7 @@ public class XTankUI
 	private int y = 500;
 	private int health = 3;
 	private int id;
+	private String map;
 	private Map<Integer, Integer[]> enemyTanks;
 	private int directionX = 0;
 	private int directionY = -10;
@@ -33,14 +36,15 @@ public class XTankUI
 	private Set<Coordinate> filledCoordsMyTank;
 	private Set<Coordinate> filledCoordsEnemyTank;
 	private Set<Coordinate> filledCoordsBullet;
-
+	private Set<Coordinate> filledCoordsObstacles;
+	
 	// keep track of the tank direction
 	private int tankDirection = 0; // 0 = up, 1 = right, 2 = down, 3 = left
 	
 	DataInputStream in; 
 	PrintWriter out;
 	
-	public XTankUI(DataInputStream in, DataOutputStream out)
+	public XTankUI(DataInputStream in, DataOutputStream out, String map)
 	{
 		this.in = in;
 		this.out = new PrintWriter(out, true);
@@ -51,7 +55,17 @@ public class XTankUI
 		this.filledCoordsMyTank = new HashSet<>();
 		this.filledCoordsEnemyTank = new HashSet<>();
 		this.filledCoordsBullet = new HashSet<>();
+		this.filledCoordsObstacles = new HashSet<>();
 		this.tankDirection = 0;
+		this.map = map;
+		
+		if(map.equals("MAP2")) {
+			fillCoords(100,100,"Obstacle1");
+			fillCoords(300,500,"Obstacle2");
+		}
+			
+	
+	
 		
 	}
 
@@ -86,6 +100,19 @@ public class XTankUI
 				filledCoordsMyTank.add(toAdd);
 			}}
 			
+		} else if(type.equals("Obstacle1")) {
+			for(int i =x; i <=x+50; i++) {
+				for(int j = y ; j <= y+200; j++) {
+				Coordinate toAdd = new Coordinate(i,j);
+				filledCoordsObstacles.add(toAdd);
+			}}
+		}
+		else if(type.equals("Obstacle2")) {
+			for(int i =x; i <=x+300; i++) {
+				for(int j = y ; j <= y+50; j++) {
+				Coordinate toAdd = new Coordinate(i,j);
+				filledCoordsObstacles.add(toAdd);
+			}}
 		}
 		else {
 			for(int i =x; i <=x+10; i++) {
@@ -97,27 +124,20 @@ public class XTankUI
 		
 	}
 	
-	public String isCollision() {
+	public String isBulletCollision() {
 			
 		 	boolean enemyCollision = false;
 		 	boolean myCollision = false;
 		 	
 		 	for(Coordinate bulletCoord: filledCoordsBullet) {
-		 		for(Coordinate tankCoord: filledCoordsEnemyTank) {
-		 			
-		 			if(tankCoord.getCoord()[0] == bulletCoord.getCoord()[0] && 
-		 					tankCoord.getCoord()[1] == bulletCoord.getCoord()[1])
-		 			{enemyCollision = true;}
+		 		if(filledCoordsEnemyTank.contains(bulletCoord) ) {
+		 			{enemyCollision = true;
+		 			}
 		 		}
-		 	}
-		 	
-		 	for(Coordinate bulletCoord: filledCoordsBullet) {
-		 		for(Coordinate tankCoord: filledCoordsMyTank) {
-		 			
-		 			if(tankCoord.getCoord()[0] == bulletCoord.getCoord()[0] && 
-		 					tankCoord.getCoord()[1] == bulletCoord.getCoord()[1])
+		 		if(filledCoordsMyTank.contains(bulletCoord) ) {
 		 			{myCollision = true;}
 		 		}
+		 		
 		 	}
 		 	
 		 	
@@ -134,6 +154,39 @@ public class XTankUI
 			
 		}
 	
+	public String isObstacleCollision() {
+			
+			boolean tankCollision = false;
+			boolean bulletCollision = false;
+			
+	 		for(Coordinate tankCoord: filledCoordsMyTank) {	
+	 			if(filledCoordsObstacles.contains(tankCoord))
+	 			{
+	 			   System.out.println(tankCoord.getCoord()[0] + " " + tankCoord.getCoord()[1]);
+	 		       tankCollision = true;
+	 		       break;
+	 			}
+	 		}
+	 		
+	 		for(Coordinate bulletCoord: filledCoordsBullet) {	
+	 			if(filledCoordsObstacles.contains(bulletCoord))
+	 			{
+	 				bulletCollision = true;
+		 		       break;
+	 			}
+	 		}
+	 		
+	 	if(tankCollision && bulletCollision) {
+	 		return "both";
+	 	}else if(tankCollision) {
+	 		return "tank";
+	 	}else if(bulletCollision) {
+	 		return "bullet";
+	 	}
+	 	return "none";
+		
+		
+	}
 
 	
 	public void start()
@@ -142,7 +195,7 @@ public class XTankUI
 		display = new Display();
 		Shell shell = new Shell(display);
 		shell.setText("xtank");
-//		shell.setLayout(new FillLayout());
+
 		
 		GridLayout gridLayout = new GridLayout();
         shell.setLayout( gridLayout);
@@ -156,23 +209,26 @@ public class XTankUI
         Composite upperComp = new Composite(shell, SWT.NO_FOCUS);
         Composite lowerComp = new Composite(shell, SWT.NO_FOCUS);
 
-//		canvas = new Canvas(shell, SWT.NO_BACKGROUND);
-		
-		
-        
+
         canvas = new Canvas(upperComp, SWT.NONE);
-        canvas.setSize(800,650); // increased this a little bit 
-        
-//        Canvas lowerCanvas = new Canvas(lowerComp, SWT.NONE);
-//        canvas.setSize(800,200);
-        
-        
+        canvas.setSize(800,650); 
+
 	
 
 		canvas.addPaintListener(event -> {	
 			
+			event.gc.fillRectangle(canvas.getBounds());
+			this.filledCoordsMyTank.clear();
+			
+			if(map.equals("MAP2")) {
+				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+				event.gc.fillRectangle(100,100, 50, 200);
+				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+				event.gc.fillRectangle(300,500, 300, 50);
+			}
+			
 			if(health>0) {
-				event.gc.fillRectangle(canvas.getBounds());
+				
 				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_DARK_GREEN));
 				event.gc.fillRectangle(x, y, 50, 100);
 				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_BLACK));
@@ -192,7 +248,7 @@ public class XTankUI
 					event.gc.drawLine(x+50, y+50, x+75, y+50);
 				}
 				
-				this.filledCoordsMyTank.clear();
+				
 				fillCoords(x,y, "My Tank");
 				
 			}
@@ -231,21 +287,29 @@ public class XTankUI
 				for (int i = 0; i < bulletsList.size(); i++) {
 					
 					Bullet bullet = bulletsList.get(i);
-
-					// if the bullet is out of bounds, remove it
-					if(bullet.getX() < 0 || bullet.getX() > 800 || bullet.getY() < 0 || bullet.getY() > 650) {	
-						continue; // TODO: remove the bullet from the list
-					}
-					
 					this.filledCoordsBullet.clear();
 					fillCoords(bullet.getX(), bullet.getY(), "Bullet");
 
-					event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
-					event.gc.fillRectangle( bullet.getX(), bullet.getY(), 10, 10);
-					
-					if(!(isCollision().equals("none"))) {
+					// if the bullet is out of bounds, remove it
+					if(bullet.getX() < 0 || bullet.getX() > 800 || bullet.getY() < 0 || bullet.getY() > 650) {	
 						bulletsList.remove(i);
 					}
+					
+					else if((!(isBulletCollision().equals("none"))) || isObstacleCollision().equals("bullet")  
+							|| isObstacleCollision().equals("both")) {
+						bulletsList.remove(i);
+					} 
+					
+					else {
+						
+						
+
+						event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+						event.gc.fillRectangle( bullet.getX(), bullet.getY(), 10, 10);
+		
+					}
+					
+					
 					
 				}
 				
@@ -255,39 +319,50 @@ public class XTankUI
 			for (int i = 0; i < enemyBulletsList.size(); i++) {
 				
 				Bullet bullet = enemyBulletsList.get(i);
-				// if the bullet is out of bounds, remove it
-				if(bullet.getX() < 0 || bullet.getX() > 800 || bullet.getY() < 0 || bullet.getY() > 650) {
-					continue; // TODO: ideally, remove the bullet from the list
-				}
 				this.filledCoordsBullet.clear();
 				fillCoords(bullet.getX(), bullet.getY(), "Bullet");
+				// if the bullet is out of bounds, remove it
+				if(bullet.getX() < 0 || bullet.getX() > 800 || bullet.getY() < 0 || bullet.getY() > 650) {
+					enemyBulletsList.remove(i);
+				}
 				
-				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_RED));
-				event.gc.fillRectangle( bullet.getX(), bullet.getY(), 10, 10);
-				
-				if((isCollision().equals("mine") || isCollision().equals("both") ))  {
+				else if((isBulletCollision().equals("mine") || isBulletCollision().equals("both") ))  {
 					health--;
 					healthText.setText("Health: "+health);
 					enemyBulletsList.remove(i);
-				} else if(!(isCollision().equals("none"))) {
+				} 
+				
+				else if(!(isBulletCollision().equals("none")) || isObstacleCollision().equals("bullet") || 
+						isObstacleCollision().equals("both")) {
 					enemyBulletsList.remove(i);
 				}
 				
-				if(health<=0) {
-					healthText.setText("GAME OVER");
-					out.println("REMOVE: "+this.id + " X: -100 Y: -100");
+				else {
 					
-					Button quitButton = new Button(lowerComp, SWT.PUSH);
-			        quitButton.setText("Quit");
-			        quitButton.setSize(60, 50);
-			        quitButton.setForeground(display.getSystemColor(SWT.COLOR_GREEN));
-			        quitButton.addListener(SWT.Selection, new Listener() {
-			            public void handleEvent(Event e) {
-			            	System.exit(0);
-			            }
-			          });
 					
+					
+					event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_RED));
+					event.gc.fillRectangle( bullet.getX(), bullet.getY(), 10, 10);
+					
+					
+					
+					if(health<=0) {
+						healthText.setText("GAME OVER");
+						out.println("REMOVE: "+this.id + " X: -100 Y: -100 D: -1");
+						
+						Button quitButton = new Button(lowerComp, SWT.PUSH);
+				        quitButton.setText("Quit");
+				        quitButton.setSize(60, 50);
+				        quitButton.setForeground(display.getSystemColor(SWT.COLOR_GREEN));
+				        quitButton.addListener(SWT.Selection, new Listener() {
+				            public void handleEvent(Event e) {
+				            	System.exit(0);
+				            }
+				          });
+						
+					}
 				}
+				
 				
 				
 			}
@@ -310,98 +385,142 @@ public class XTankUI
 		canvas.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {
 				System.out.println("key " + e.keyCode + " pressed");
-				// update tank location
 				
-				if(e.keyCode == 32) {
+				if(health > 0) {
 					
-					Bullet bullet = new Bullet(x + 20, y - 30, id, 0);
-					int bulletDir = getBulletDirection(bullet);
-					bullet.setDirection(bulletDir);
-					bulletsList.add(bullet);
-					try {
-						out.println("BULLET: "+bullet.getId() + " X: " + bullet.getX() + " Y: " + bullet.getY() + " D: " + bulletDir);
-					}
-					catch(Exception ex) {
-						System.out.println("The server did not respond (write KL).");
-					}
-					
-					Timer timer = new Timer();
-					timer.scheduleAtFixedRate(new TimerTask() {
-	                    @Override
-	                    public void run() {
-	                        Display.getDefault().asyncExec(new Runnable() {
-	                            public void run() {
-	                            	
-	                            	bullet.incrementY();
-									canvas.redraw();
-	
-									if(bullet.getY() <= -10) {
-										bulletsList.remove(bullet);
-										timer.cancel();
+					if(e.keyCode == 32) {
+						
+						Bullet bullet = new Bullet(x + 20, y - 30, id, 0);
+						int bulletDir = getBulletDirection(bullet);
+						bullet.setDirection(bulletDir);
+						bulletsList.add(bullet);
+						
+						try {
+							out.println("BULLET: "+bullet.getId() + " X: " + bullet.getX() + " Y: " + bullet.getY() + " D: " + bulletDir);
+						}
+						catch(Exception ex) {
+							System.out.println("The server did not respond (write KL).");
+						}
+						
+						Timer timer = new Timer();
+						timer.scheduleAtFixedRate(new TimerTask() {
+		                    @Override
+		                    public void run() {
+		                        Display.getDefault().asyncExec(new Runnable() {
+		                            public void run() {
+		                            	
+		                            	bullet.incrementY();
 										canvas.redraw();
-									}
-	                            }
-	                        });
-	                    }
-	                },0,50);
-										
-					
-					
-					
-					
-				} 
-				
-				else if(e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_DOWN || e.keyCode == SWT.ARROW_LEFT || e.keyCode == SWT.ARROW_RIGHT || e.keyCode == 119 || e.keyCode == 115 || e.keyCode == 97 || e.keyCode == 100) {
-					
-					if (e.keyCode == SWT.ARROW_UP) {
-						directionX = 0;
-						directionY = -10;
-						x += directionX;
-						y += directionY;
-					} else if (e.keyCode == SWT.ARROW_DOWN) {
-						directionX = 0;
-						directionY = 10;
-						x += directionX;
-						y += directionY;
+		
+										if(bullet.getY() <= -10) {
+											bulletsList.remove(bullet);
+											timer.cancel();
+											canvas.redraw();
+										}
+		                            }
+		                        });
+		                    }
+		                },0,50);
+											
 						
-					} else if (e.keyCode == SWT.ARROW_LEFT) {
-						directionX = -10;
-						directionY = 0;
-						x += directionX;
-						y += directionY;
 						
-					} else if (e.keyCode == SWT.ARROW_RIGHT) {
-						directionX = 10;
-						directionY = 0;
-						x += directionX;
-						y += directionY;
+						
+						
 					} 
-
-					// check if keys are wasd, and if so, change direction
-					if (e.keyCode == 119) {
-						System.out.println("W was pressed");
-						tankDirection = 0;
-					} else if (e.keyCode == 115) {
-						tankDirection = 1;
-						
-					} else if (e.keyCode == 97) {
-						tankDirection = 2;
-						
-					} else if (e.keyCode == 100) {
-						tankDirection = 3;
-					}
-
-
-					try {
-						
-						out.println("ID: " + id + " X: " + x + " Y: " + y + " D: " + tankDirection);
-					}
-					catch(Exception ex) {
-						System.out.println("The server did not respond (write KL).");
-					}
-					canvas.redraw();
 					
+					else if(e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_DOWN || e.keyCode == SWT.ARROW_LEFT || 
+							e.keyCode == SWT.ARROW_RIGHT || e.keyCode == 119 || e.keyCode == 115 || e.keyCode == 97 || 
+							e.keyCode == 100) {
 
+						if (e.keyCode == SWT.ARROW_UP) {
+							
+								directionX = 0;
+								directionY = -10;
+								x += directionX;
+								y += directionY;
+								
+								filledCoordsMyTank.clear();
+								fillCoords(x,y, "My Tank");
+								
+								if(isObstacleCollision().equals("tank") || isObstacleCollision().equals("both")){
+									x -= 2 * directionX;
+									y -= 2 * directionY;
+									
+								}
+	
+							
+						} else if (e.keyCode == SWT.ARROW_DOWN) {
+							
+							directionX = 0;
+							directionY = 10;
+							x += directionX;
+							y += directionY;
+							
+							filledCoordsMyTank.clear();
+							fillCoords(x,y, "My Tank");
+							
+							if(isObstacleCollision().equals("tank") || isObstacleCollision().equals("both")){
+								x -= 2 * directionX;
+								y -= 2 * directionY;
+							}
+							
+							
+						} else if (e.keyCode == SWT.ARROW_LEFT) {
+							
+							directionX = -10;
+							directionY = 0;
+							x += directionX;
+							y += directionY;
+							
+							filledCoordsMyTank.clear();
+							fillCoords(x,y, "My Tank");
+							
+							if(isObstacleCollision().equals("tank") || isObstacleCollision().equals("both")){
+								x = x - (2 * directionX);
+							}
+							
+							
+						} else if (e.keyCode == SWT.ARROW_RIGHT) {
+					
+							directionX = 10;
+							directionY = 0;
+							x += directionX;
+							y += directionY;
+							
+							filledCoordsMyTank.clear();
+							fillCoords(x,y, "My Tank");
+							
+							if(isObstacleCollision().equals("tank") || isObstacleCollision().equals("both")){
+								x -= 2 * directionX;
+								y -= 2 * directionY;
+							}
+							
+						} 
+
+						// check if keys are wasd, and if so, change direction
+						else if (e.keyCode == 119) {
+							System.out.println("W was pressed");
+							tankDirection = 0;
+						} else if (e.keyCode == 115) {
+							tankDirection = 1;
+							
+						} else if (e.keyCode == 97) {
+							tankDirection = 2;
+							
+						} else if (e.keyCode == 100) {
+							tankDirection = 3;
+						}
+
+
+						try {
+							
+							out.println("ID: " + id + " X: " + x + " Y: " + y + " D: " + tankDirection);
+						}
+						catch(Exception ex) {
+							System.out.println("The server did not respond (write KL).");
+						}
+						
+						canvas.redraw();}
 					
 				}
 				
@@ -453,6 +572,21 @@ public class XTankUI
 						XTankUI.this.x = x;
 						XTankUI.this.y = y;
 						tankDirection = d;
+						
+						filledCoordsMyTank.clear();
+						fillCoords(x,y, "My Tank");
+						
+						while(isObstacleCollision().equals("tank") || 
+								isObstacleCollision().equals("both")) {
+							
+							XTankUI.this.x = (int)(Math.random()*500);
+							XTankUI.this.y = (int)(Math.random()*500);
+							
+							filledCoordsMyTank.clear();
+							fillCoords(XTankUI.this.x, XTankUI.this.y, "My Tank");
+						}
+						
+						
 						canvas.redraw();
 					}
 					else if (status.equals("ID:") && id != tmpid)
@@ -497,10 +631,11 @@ public class XTankUI
 					}
 				}
 			}
-			catch(Exception ex) {
-				System.out.println("The server did not respond (async).");
+			catch(IOException ex) {
+				System.out.println(ex);
 			}				
             display.timerExec(1, this);
+//			display.asyncExec(this);
 		}
 	};	
 	
@@ -590,6 +725,31 @@ public class XTankUI
 		 public void setCoord(int x, int y) {
 			 this.coordinates[0] = x;
 			 this.coordinates[1] = y;
+		 }
+		 
+		 @Override
+		 public int hashCode() {
+			 
+			    int result = Arrays.hashCode(coordinates);
+			    return result;
+		 }
+		 
+		 @Override 
+		 public boolean equals(Object o) {
+			 
+			 
+			 if(!(o instanceof Coordinate)) {
+				 return false;
+			 }
+			 
+			 Coordinate x = (Coordinate) o;
+		
+			 if(this.coordinates[0] == x.getCoord()[0] && 
+					 this.coordinates[1] == x.getCoord()[1]) {
+				 return true;
+			 }
+			
+			 return false;
 		 }
 		 
 		
