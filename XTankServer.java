@@ -67,19 +67,52 @@ public class XTankServer
                 int randX = (int)(Math.random()*500);
                 int randY = (int)(Math.random()*500);
                 
+                Player p = new Player(currid, randX, randY, 0, game.getMaxHealth());
+                game.addPlayer(p);
+                List<Player> players = game.getPlayers();
+                
                 outWriter.println("YOURID: " + currid + " X: " + randX + " Y: " + randY + 
-                " D: " + 0 + " M: " + 1 +" " + game.getMaxHealth() + " " + game.getMap());
-              
-                              
+                " D: " + 0 + " M: " + 1 +" " + players.size() +" " + game.getMaxHealth() + " " + game.getMap());
+                
+                
+                for(int i =0; i < players.size(); i++) {
+                	Player player = players.get(i);
+                	outWriter.println("ID: " + player.getId() + " X: " + player.getX() + " Y: " + player.getY() + " D: " + player.getD() + " M: 0" );
+                }
+     
                 while (true)
                 {
 					if (in.available() > 0) {
 					     String line = scanner.nextLine();
 	                        System.out.println(line);
+	                        
 	                         
 	                    if(line.equals("WINNER")) {
 	                    	accept = false;
 	                    }else {
+	                    	
+	                    	String[] parts = line.split(" ");
+	    					String status = parts[0];
+	    					int tmpid = Integer.parseInt(parts[1]);
+	    					int x = Integer.parseInt(parts[3]);
+	    					int y = Integer.parseInt(parts[5]);
+	    					int d = Integer.parseInt(parts[7]);
+	    					
+	    					
+	    					if (status.equals("ID:"))
+	    					{
+	    						Player player = game.getPlayerById(tmpid);
+	    						player.setX(x);
+	    						player.setY(y);
+	    						player.setD(d);
+	    		
+	    					}	
+	    					
+	    					else if(status.equals("REMOVE:")) {
+	    						Player player = game.getPlayerById(tmpid);
+	    						game.removePlayer(player);
+	    					}
+	                    	
 	                    	for (DataOutputStream o: sq)
 		                	{
 		                		PrintWriter outWriter2 = new PrintWriter(o, true);

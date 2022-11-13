@@ -621,6 +621,7 @@ public class XTankUI
 			try {
 				if (in.available() > 0) {
 					Scanner sin = new Scanner(in);
+					
 					String line = sin.nextLine();
 					if (line == "") {
 						System.out.println("The server did not respond (read KL).");
@@ -645,6 +646,7 @@ public class XTankUI
 						tankDirection = d;
 						map = parts[parts.length - 1];
 						health = Integer.parseInt(parts[parts.length - 2]);
+						int playersNum = Integer.parseInt(parts[parts.length - 3]);
 						healthText.setText("Health: "+health  + "     ");
 						
 						filledCoordsMyTank.clear();
@@ -683,18 +685,36 @@ public class XTankUI
 						
 						out.println("ID: " + id + " X: " + XTankUI.this.x + " Y: " +
 						 XTankUI.this.y + " D: " + tankDirection+ " M: " + 1);
+						
+						System.out.println("num "+playersNum);
+						for(int i =0; i < playersNum; i ++) {
+							String l = sin.nextLine();
+							
+							String[] partsl = l.split(" ");
+							String statusl = partsl[0];
+							int tmpidl = Integer.parseInt(partsl[1]);
+							int xl = Integer.parseInt(partsl[3]);
+							int yl = Integer.parseInt(partsl[5]);
+							int dl = Integer.parseInt(partsl[7]);
+							
+							System.out.println("input "+l);
+							
+							
+							if (statusl.equals("ID:") && id != tmpidl)
+							{
+								System.out.println("in: " + tmpidl);
+								enemyTanks.put(tmpidl, new Integer[] {xl, yl, dl});
+								
+							}	
+		
+						}
+						System.out.println("Enemy count 1: " + enemyTanks.size());
+						
+					
 						canvas.redraw();
 						
 					}
 
-					else if (status.equals("ID:") && id != tmpid && (!enemyTanks.containsKey(tmpid)))
-					{
-						out.println("ID: " + id + " X: " + XTankUI.this.x + " Y: " + 
-						XTankUI.this.y + " D: " + tankDirection+ " M: " + XTankUI.this.tankModel);	
-						enemyTanks.put(tmpid, new Integer [] {x, y, d});
-						canvas.redraw();
-						
-					}	
 					else if (status.equals("ID:") && id != tmpid)
 					{
 						enemyTanks.put(tmpid, new Integer[] {x, y, d});
