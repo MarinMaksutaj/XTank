@@ -31,8 +31,13 @@ public class XTankServer
             Game game = new Game();
             while (true) 
             {
+            	
+            	Socket socket = listener.accept();
                 Player player = new Player("Test", 0, (int)(Math.random()*1000));
-                pool.execute(new XTankManager(listener.accept(), player, game));
+                game.addPlayer(player);
+                
+                pool.execute(new XTankManager(socket, player, game));
+
             }
         }
     }
@@ -68,19 +73,21 @@ public class XTankServer
                 currentPlayer.setY(randY);
                 outWriter.println("YOURID: " + currid + " X: " + randX + " Y: " + randY + " D: " + 0);
                 
+                
                 while (true)
                 {
 					if (in.available() > 0) {
                         String line = scanner.nextLine();
                         System.out.println(line);
+                         
                 	for (DataOutputStream o: sq)
                 	{
                 		PrintWriter outWriter2 = new PrintWriter(o, true);
-    						outWriter2.println(line);
-                	}
+    					outWriter2.println(line);
+        		
                     }
                 }
-            } 
+            } }
             catch (Exception e) 
             {
                 System.out.println("Error:" + socket);

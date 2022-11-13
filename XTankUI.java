@@ -534,7 +534,7 @@ public class XTankUI
 
 		System.out.println("testing");				
 		Runnable runnable = new Runner();
-		display.asyncExec(runnable);
+		display.timerExec(1, runnable);
 		shell.open();
 		while (!shell.isDisposed()) 
 			if (!display.readAndDispatch())
@@ -557,6 +557,8 @@ public class XTankUI
 						return;
 					}
 					System.out.println(line);
+					
+					
 					// update tank location
 					// current format: "YOURID: 1 X: 300 Y: 500 D: 0"
 					// or "ENEMYID: 1 X: 300 Y: 500 D: 0"
@@ -566,6 +568,7 @@ public class XTankUI
 					int x = Integer.parseInt(parts[3]);
 					int y = Integer.parseInt(parts[5]);
 					int d = Integer.parseInt(parts[7]);
+					
 					if (status.equals("YOURID:"))
 					{
 						id = tmpid;
@@ -586,21 +589,25 @@ public class XTankUI
 							fillCoords(XTankUI.this.x, XTankUI.this.y, "My Tank");
 						}
 						
-						// print out to server the ID, X, Y, and D
 						out.println("ID: " + id + " X: " + XTankUI.this.x + " Y: " + XTankUI.this.y + " D: " + tankDirection);
 						canvas.redraw();
+						
 					}
+					else if (status.equals("ID:") && id != tmpid && (!enemyTanks.containsKey(tmpid)))
+					{
+						out.println("ID: " + id + " X: " + XTankUI.this.x + " Y: " + XTankUI.this.y + " D: " + tankDirection);	
+						enemyTanks.put(tmpid, new Integer [] {x, y, d});
+						canvas.redraw();
+						
+					}	
 					else if (status.equals("ID:") && id != tmpid)
 					{
+						enemyTanks.put(tmpid, new Integer [] {x, y, d});		
 						
-						System.out.println("Enemy count: " + enemyTanks.size());
-						if (!enemyTanks.containsKey(tmpid)) {
-							enemyTanks.put(tmpid, new Integer [] {x, y, d});
-							out.println("ID: " + id + " X: " + XTankUI.this.x + " Y: " + XTankUI.this.y + " D: " + tankDirection);
-						}
 						canvas.redraw();
-					}
+					}	
 					
+					 
 					else if (status.equals("BULLET:") && id != tmpid)
 					{
 						Bullet bullet = new Bullet(x,y,tmpid, d);
@@ -634,6 +641,7 @@ public class XTankUI
 						enemyTanks.remove(tmpid);
 						canvas.redraw();
 					}
+					
 				}
 			}
 			catch(IOException ex) {
