@@ -216,7 +216,6 @@ public class XTankUI {
 
 		for (Coordinate tankCoord : filledCoordsMyTank) {
 			if (filledCoordsObstacles.contains(tankCoord)) {
-				System.out.println(tankCoord.getCoord()[0] + " " + tankCoord.getCoord()[1]);
 				tankCollision = true;
 				break;
 			}
@@ -244,7 +243,6 @@ public class XTankUI {
 	 * Start method used to start the game. Author: Shyambhavi
 	 */
 	public void start() {
-		System.out.println("Testingg");
 		display = new Display();
 		Shell shell = new Shell(display);
 		shell.setText("xtank");
@@ -431,7 +429,6 @@ public class XTankUI {
 
 		canvas.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {
-				System.out.println("key " + e.keyCode + " pressed");
 
 				if (health > 0) {
 
@@ -536,7 +533,6 @@ public class XTankUI {
 						}
 						// check if keys are wasd, and if so, change direction
 						else if (e.keyCode == 119) {
-							System.out.println("W was pressed");
 							tankDirection = 0;
 						} else if (e.keyCode == 115) {
 							tankDirection = 1;
@@ -596,7 +592,6 @@ public class XTankUI {
 			}
 		});
 
-		System.out.println("testing");
 		Runnable runnable = new Runner();
 		display.timerExec(1, runnable);
 		shell.open();
@@ -627,7 +622,6 @@ public class XTankUI {
 						System.out.println("The server did not respond (read KL).");
 						return;
 					}
-					System.out.println(line);
 
 					String[] parts = line.split(" ");
 					String status = parts[0];
@@ -679,7 +673,6 @@ public class XTankUI {
 							fillCoords(XTankUI.this.x, XTankUI.this.y, "My Tank");
 						}
 						
-						System.out.println("num "+playersNum);
 						for(int i =0; i < playersNum; i ++) {
 							String l = sin.nextLine();
 							
@@ -688,20 +681,15 @@ public class XTankUI {
 							int tmpidl = Integer.parseInt(partsl[1]);
 							int xl = Integer.parseInt(partsl[3]);
 							int yl = Integer.parseInt(partsl[5]);
-							int dl = Integer.parseInt(partsl[7]);
-							
-							System.out.println("input "+l);
-							
+							int dl = Integer.parseInt(partsl[7]);							
 							
 							if (statusl.equals("ID:") && id != tmpidl)
 							{
-								System.out.println("in: " + tmpidl);
 								enemyTanks.put(tmpidl, new Integer[] {xl, yl, dl});
 								
 							}	
 		
 						}
-						System.out.println("Enemy count 1: " + enemyTanks.size());
 						
 						out.println("ID: " + id + " X: " + XTankUI.this.x + " Y: " +
 						 XTankUI.this.y + " D: " + tankDirection+ " M: " + 1);
@@ -713,7 +701,6 @@ public class XTankUI {
 					else if (status.equals("ID:") && id != tmpid)
 					{
 						enemyTanks.put(tmpid, new Integer[] {x, y, d});
-						System.out.println("Enemy count: " + enemyTanks.size());
 						canvas.redraw();
 					}
 

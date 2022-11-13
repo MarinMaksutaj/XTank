@@ -95,9 +95,7 @@ public class XTankServer {
                 while (true)
                 {
 					if (in.available() > 0) {
-					     String line = scanner.nextLine();
-	                        System.out.println(line);
-	                        
+					     String line = scanner.nextLine();	                        
 	                         
 	                    if(line.equals("WINNER")) {
 	                    	accept = false;
