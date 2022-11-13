@@ -12,7 +12,7 @@ public class XTank
             // set a random tankID
         	DataInputStream in = new DataInputStream(socket.getInputStream());
         	DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-        	var ui = new XTankUI(in, out, "MAP2");
+        	var ui = new XTankUI(in, out, "none");
             ui.start();
         }
     }

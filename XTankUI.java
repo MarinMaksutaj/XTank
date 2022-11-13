@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Arrays;  
 import java.util.ArrayList;
 import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,7 +24,7 @@ public class XTankUI
 	// The location and direction of the "tank"
 	private int x = 300;
 	private int y = 500;
-	private double health = 3;
+	private double health;
 	private int id;
 	private String map;
 	private Map<Integer, Integer[]> enemyTanks;
@@ -38,7 +39,7 @@ public class XTankUI
 	private Set<Coordinate> filledCoordsEnemyTank;
 	private Set<Coordinate> filledCoordsBullet;
 	private Set<Coordinate> filledCoordsObstacles;
-	
+	Text healthText;
 	// keep track of the tank direction
 	private int tankDirection = 0; // 0 = up, 1 = right, 2 = down, 3 = left
 	
@@ -60,14 +61,6 @@ public class XTankUI
 		this.tankDirection = 0;
 		this.tankModel = 1;
 		this.map = map;
-		
-		if(map.equals("MAP2")) {
-			fillCoords(100,100,"Obstacle1");
-			fillCoords(300,500,"Obstacle2");
-		}
-			
-	
-	
 		
 	}
 
@@ -95,14 +88,16 @@ public class XTankUI
 				Coordinate toAdd = new Coordinate(i,j);
 				filledCoordsEnemyTank.add(toAdd);
 			}}
-		} else if(type.equals("My Tank")) {
+		} 
+		else if(type.equals("My Tank")) {
 			for(int i =x; i <=x+50; i++) {
 				for(int j = y ; j <= y+100; j++) {
 				Coordinate toAdd = new Coordinate(i,j);
 				filledCoordsMyTank.add(toAdd);
 			}}
 			
-		} else if(type.equals("Obstacle1")) {
+		} 
+		else if(type.equals("Obstacle1")) {
 			for(int i =x; i <=x+50; i++) {
 				for(int j = y ; j <= y+200; j++) {
 				Coordinate toAdd = new Coordinate(i,j);
@@ -116,6 +111,21 @@ public class XTankUI
 				filledCoordsObstacles.add(toAdd);
 			}}
 		}
+		else if(type.equals("Obstacle3")) {
+			for(int i =x; i <=x+400; i++) {
+				for(int j = y ; j <= y+50; j++) {
+				Coordinate toAdd = new Coordinate(i,j);
+				filledCoordsObstacles.add(toAdd);
+			}}
+		}
+		else if(type.equals("Obstacle4")) {
+			for(int i =x; i <=x+50; i++) {
+				for(int j = y ; j <= y+350; j++) {
+				Coordinate toAdd = new Coordinate(i,j);
+				filledCoordsObstacles.add(toAdd);
+			}}
+		}
+		
 		else {
 			for(int i =x; i <=x+10; i++) {
 				for(int j = y ; j <= y+10; j++) {
@@ -204,17 +214,27 @@ public class XTankUI
         
         shell.setSize(800,850);
         
-        Text healthText = new Text(shell, SWT.READ_ONLY | SWT.BORDER);
+        healthText = new Text(shell, SWT.READ_ONLY | SWT.BORDER);
         healthText.setText("Health: " + health);
         healthText.setForeground(display.getSystemColor(SWT.COLOR_GREEN));
         
         Composite upperComp = new Composite(shell, SWT.NO_FOCUS);
         Composite lowerComp = new Composite(shell, SWT.NO_FOCUS);
-
-
+        
         canvas = new Canvas(upperComp, SWT.NONE);
         canvas.setSize(800,650); 
 
+        
+        Button quitButton = new Button(lowerComp, SWT.PUSH);
+        quitButton.setText("Quit");
+        quitButton.setSize(60, 50);
+        quitButton.setForeground(display.getSystemColor(SWT.COLOR_GREEN));
+        quitButton.addListener(SWT.Selection, new Listener() {
+            public void handleEvent(Event e) {
+            	out.println("REMOVE: "+ id + " X: -100 Y: -100 D: -1 M: -1");
+            	System.exit(0);
+            }
+          });
 	
 
 		canvas.addPaintListener(event -> {	
@@ -227,6 +247,20 @@ public class XTankUI
 				event.gc.fillRectangle(100,100, 50, 200);
 				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 				event.gc.fillRectangle(300,500, 300, 50);
+			}
+			
+			if(map.equals("MAP3")) {
+				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+				event.gc.fillRectangle(200,600, 400, 50);
+				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+				event.gc.fillRectangle(400,100, 50, 350);
+			}
+			
+			if(map.equals("MAP4")) {
+				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+				event.gc.fillRectangle(650,100, 50, 200);
+				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+				event.gc.fillRectangle(200,500, 300, 50);
 			}
 			
 			if(health>0) {
@@ -337,15 +371,6 @@ public class XTankUI
 						healthText.setText("GAME OVER");
 						out.println("REMOVE: "+this.id + " X: -100 Y: -100 D: -1 M: -1");
 						
-						Button quitButton = new Button(lowerComp, SWT.PUSH);
-				        quitButton.setText("Quit");
-				        quitButton.setSize(60, 50);
-				        quitButton.setForeground(display.getSystemColor(SWT.COLOR_GREEN));
-				        quitButton.addListener(SWT.Selection, new Listener() {
-				            public void handleEvent(Event e) {
-				            	System.exit(0);
-				            }
-				          });
 						
 					}
 				} 
@@ -367,16 +392,6 @@ public class XTankUI
 					if(health<=0) {
 						healthText.setText("GAME OVER");
 						out.println("REMOVE: "+this.id + " X: -100 Y: -100 D: -1 M: -1");
-						
-						Button quitButton = new Button(lowerComp, SWT.PUSH);
-				        quitButton.setText("Quit");
-				        quitButton.setSize(60, 50);
-				        quitButton.setForeground(display.getSystemColor(SWT.COLOR_GREEN));
-				        quitButton.addListener(SWT.Selection, new Listener() {
-				            public void handleEvent(Event e) {
-				            	System.exit(0);
-				            }
-				          });
 						
 					}
 				}
@@ -600,6 +615,7 @@ public class XTankUI
 	{
 		public void run() 
 		{
+			
 							
 			try {
 				if (in.available() > 0) {
@@ -615,6 +631,7 @@ public class XTankUI
 					// update tank location
 					// current format: "YOURID: 1 X: 300 Y: 500 D: 0"
 					// or "ENEMYID: 1 X: 300 Y: 500 D: 0"
+
 					String[] parts = line.split(" ");
 					String status = parts[0];
 					int tmpid = Integer.parseInt(parts[1]);
@@ -622,15 +639,40 @@ public class XTankUI
 					int y = Integer.parseInt(parts[5]);
 					int d = Integer.parseInt(parts[7]);
 					int m = Integer.parseInt(parts[9]);
-					if (status.equals("YOURID:"))
+					
+	
+					 if (status.equals("YOURID:"))
 					{
 						id = tmpid;
 						XTankUI.this.x = x;
 						XTankUI.this.y = y;
 						tankDirection = d;
+						map = parts[parts.length - 1];
+						health = Integer.parseInt(parts[parts.length - 2]);
+						healthText.setText("Health: "+health);
 						
 						filledCoordsMyTank.clear();
 						fillCoords(x,y, "My Tank");
+	
+						if(map.equals("MAP2")) {
+							
+							fillCoords(100,100,"Obstacle1");
+							fillCoords(300,500,"Obstacle2");
+						}
+						
+						if(map.equals("MAP3")) {
+							
+							fillCoords(200,600,"Obstacle3");
+							fillCoords(400,100,"Obstacle4");
+							
+						}
+						
+						if(map.equals("MAP4")) {
+							
+							fillCoords(650, 100, "Obstacle1");
+							fillCoords(200, 500, "Obstacle2");
+							
+						}
 						
 						while(isObstacleCollision().equals("tank") || 
 								isObstacleCollision().equals("both")) {
@@ -642,10 +684,12 @@ public class XTankUI
 							fillCoords(XTankUI.this.x, XTankUI.this.y, "My Tank");
 						}
 						
+						
 						out.println("ID: " + id + " X: " + XTankUI.this.x + " Y: " + XTankUI.this.y + " D: " + tankDirection+ " M: " + 1);
 						canvas.redraw();
 						
 					}
+
 					else if (status.equals("ID:") && id != tmpid && (!enemyTanks.containsKey(tmpid)))
 					{
 						out.println("ID: " + id + " X: " + XTankUI.this.x + " Y: " + XTankUI.this.y + " D: " + tankDirection+ " M: " + XTankUI.this.tankModel);	
@@ -655,8 +699,8 @@ public class XTankUI
 					}	
 					else if (status.equals("ID:") && id != tmpid)
 					{
-						enemyTanks.put(tmpid, new Integer [] {x, y, d});		
-						
+						enemyTanks.put(tmpid, new Integer[] {x, y, d});
+						System.out.println("Enemy count: " + enemyTanks.size());
 						canvas.redraw();
 					}	
 					
@@ -692,8 +736,14 @@ public class XTankUI
 					else if(status.equals("REMOVE:") && id != tmpid ) {
 						
 						enemyTanks.remove(tmpid);
+						if(enemyTanks.size()==0) {
+							healthText.setText("WINNER");
+							out.println("WINNER");
+						}
+				        
 						canvas.redraw();
 					}
+					
 					
 				}
 			}

@@ -18,6 +18,7 @@ import java.util.Scanner;
 public class XTankServer 
 {
 	static ArrayList<DataOutputStream> sq;
+	static boolean accept = true; 
 	
     public static void main(String[] args) throws Exception 
     {
@@ -29,7 +30,8 @@ public class XTankServer
             System.out.println("The XTank server is running...");
             var pool = Executors.newFixedThreadPool(20);
             Game game = new Game();
-            while (true) 
+            
+            while (accept) 
             {
             	
             	Socket socket = listener.accept();
@@ -37,7 +39,7 @@ public class XTankServer
                 game.addPlayer(player);
                 
                 pool.execute(new XTankManager(socket, player, game));
-
+                
             }
         }
     }
@@ -71,19 +73,29 @@ public class XTankServer
                 int randY = (int)(Math.random()*500);
                 currentPlayer.setX(randX);
                 currentPlayer.setY(randY);
-                outWriter.println("YOURID: " + currid + " X: " + randX + " Y: " + randY + " D: " + 0 + " M: " + 1);
+                
+                
+                outWriter.println("YOURID: " + currid + " X: " + randX + " Y: " + randY + " D: " + 0 + " M: " + 1 +" " + game.getMaxHealth() + " " + game.getMap());
+              
+                              
                 while (true)
                 {
 					if (in.available() > 0) {
-                        String line = scanner.nextLine();
-                        System.out.println(line);
-                         
-                	for (DataOutputStream o: sq)
-                	{
-                		PrintWriter outWriter2 = new PrintWriter(o, true);
-    					outWriter2.println(line);
-        		
-                    }
+					     String line = scanner.nextLine();
+	                        System.out.println(line);
+	                         
+	                    if(line.equals("WINNER")) {
+	                    	accept = false;
+	                    }else {
+	                    	for (DataOutputStream o: sq)
+		                	{
+		                		PrintWriter outWriter2 = new PrintWriter(o, true);
+		    					outWriter2.println(line);
+		        		
+		                    }
+	                    }
+	                	
+                        
                 }
             } }
             catch (Exception e) 
@@ -128,10 +140,35 @@ public class XTankServer
     private static class Game 
     {
         private List<Player> players;
+        
+        String map;
+        
+        int maxHealth;
 
         public Game() 
         {
             players = new ArrayList<>();
+            
+            int randMap = (int)(Math.random()*500);
+			
+			if(randMap% 4 == 0) {
+				map = "MAP4";
+			} else if(randMap% 3 == 0) {
+				map = "MAP3";
+			}
+			else if(randMap% 2 == 0) {
+				map = "MAP2";
+			}else {
+				map = "MAP1";
+			}
+			
+			int randHealth = (int)(Math.random()*500);
+			
+			if(randHealth% 2 == 0) {
+				maxHealth = 5;
+			} else {
+				maxHealth = 3;
+			}
         }
 
         public void addPlayer(Player player) 
@@ -147,6 +184,16 @@ public class XTankServer
         public List<Player> getPlayers() 
         {
             return players;
+        }
+        
+        public int getMaxHealth() 
+        {
+            return maxHealth;
+        }
+        
+        public String getMap() 
+        {
+            return map;
         }
     }
 
