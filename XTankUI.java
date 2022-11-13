@@ -174,7 +174,8 @@ public class XTankUI
 	 		for(Coordinate tankCoord: filledCoordsMyTank) {	
 	 			if(filledCoordsObstacles.contains(tankCoord))
 	 			{
-	 			   System.out.println(tankCoord.getCoord()[0] + " " + tankCoord.getCoord()[1]);
+	 			   System.out.println(tankCoord.getCoord()[0] + " " + 
+				   tankCoord.getCoord()[1]);
 	 		       tankCollision = true;
 	 		       break;
 	 			}
@@ -265,7 +266,8 @@ public class XTankUI
 			
 			if(health>0) {
 				
-				event.gc.setBackground(shell.getDisplay().getSystemColor(tankModel == 1 ? SWT.COLOR_DARK_GREEN : SWT.COLOR_BLUE));
+				event.gc.setBackground(shell.getDisplay().getSystemColor(tankModel == 1 ? 
+				SWT.COLOR_DARK_GREEN : SWT.COLOR_BLUE));
 				event.gc.fillRectangle(x, y, 50, 100);
 				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_BLACK));
 				event.gc.fillOval(x, y+25, 50, 50);
@@ -303,16 +305,20 @@ public class XTankUI
 				event.gc.setLineWidth(4);
 				// draw the line based on the direction
 				if(enemyTank[2] == 0) {
-					event.gc.drawLine(enemyTank[0]+25, enemyTank[1]+25, enemyTank[0]+25, enemyTank[1]-25);
+					event.gc.drawLine(enemyTank[0]+25, enemyTank[1]+25, enemyTank[0]+25, 
+					enemyTank[1]-25);
 				} else if(enemyTank[2] == 1) {
 					// down
-					event.gc.drawLine(enemyTank[0]+25, enemyTank[1]+75, enemyTank[0]+25, enemyTank[1]+125);
+					event.gc.drawLine(enemyTank[0]+25, enemyTank[1]+75, enemyTank[0]+25, 
+					enemyTank[1]+125);
 				} else if(enemyTank[2] == 2) {
 					// draw line to the left
-					event.gc.drawLine(enemyTank[0], enemyTank[1] + 50, enemyTank[0] - 25, enemyTank[1] + 50);
+					event.gc.drawLine(enemyTank[0], enemyTank[1] + 50, enemyTank[0] - 25, 
+					enemyTank[1] + 50);
 				} else if(enemyTank[2] == 3) {
 					// draw line to the right
-					event.gc.drawLine(enemyTank[0]+50, enemyTank[1]+50, enemyTank[0]+75, enemyTank[1]+50);
+					event.gc.drawLine(enemyTank[0]+50, enemyTank[1]+50, enemyTank[0]+75, 
+					enemyTank[1]+50);
 				}
 				
 				fillCoords(enemyTank[0], enemyTank[1], "Tank");
@@ -327,11 +333,13 @@ public class XTankUI
 					fillCoords(bullet.getX(), bullet.getY(), "Bullet");
 
 					// if the bullet is out of bounds, remove it
-					if(bullet.getX() < 0 || bullet.getX() > 800 || bullet.getY() < 0 || bullet.getY() > 650) {	
+					if(bullet.getX() < 0 || bullet.getX() > 800 || bullet.getY() < 0 
+					|| bullet.getY() > 650) {	
 						bulletsList.remove(i);
 					}
 					
-					else if((!(isBulletCollision().equals("none"))) || isObstacleCollision().equals("bullet")  
+					else if((!(isBulletCollision().equals("none"))) || 
+					isObstacleCollision().equals("bullet")  
 							|| isObstacleCollision().equals("both")) {
 						bulletsList.remove(i);
 					} 
@@ -358,11 +366,13 @@ public class XTankUI
 				this.filledCoordsBullet.clear();
 				fillCoords(bullet.getX(), bullet.getY(), "Bullet");
 				// if the bullet is out of bounds, remove it
-				if(bullet.getX() < 0 || bullet.getX() > 800 || bullet.getY() < 0 || bullet.getY() > 650) {
+				if(bullet.getX() < 0 || bullet.getX() > 800 || bullet.getY() < 0 
+				|| bullet.getY() > 650) {
 					enemyBulletsList.remove(i);
 				}
 				
-				else if((isBulletCollision().equals("mine") || isBulletCollision().equals("both") ))  {
+				else if((isBulletCollision().equals("mine") || 
+				isBulletCollision().equals("both") ))  {
 					health -= bullet.getDamage();
 					healthText.setText("Health: "+ health  + "     ");
 					enemyBulletsList.remove(i);
@@ -375,7 +385,8 @@ public class XTankUI
 					}
 				} 
 				
-				else if(!(isBulletCollision().equals("none")) || isObstacleCollision().equals("bullet") || 
+				else if(!(isBulletCollision().equals("none")) || 
+				isObstacleCollision().equals("bullet") || 
 						isObstacleCollision().equals("both")) {
 					enemyBulletsList.remove(i);
 				}
@@ -429,7 +440,8 @@ public class XTankUI
 						bulletsList.add(bullet);
 						
 						try {
-							out.println("BULLET: "+bullet.getId() + " X: " + bullet.getX() + " Y: " + bullet.getY() + " D: " + bulletDir + " M: " + tankModel);
+							out.println("BULLET: "+bullet.getId() + " X: " + bullet.getX() 
+							+ " Y: " + bullet.getY() + " D: " + bulletDir + " M: " + tankModel);
 						}
 						catch(Exception ex) {
 							System.out.println("The server did not respond (write KL).");
@@ -461,8 +473,10 @@ public class XTankUI
 						
 					} 
 					
-					else if(e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_DOWN || e.keyCode == SWT.ARROW_LEFT || 
-							e.keyCode == SWT.ARROW_RIGHT || e.keyCode == 119 || e.keyCode == 115 || e.keyCode == 97 || 
+					else if(e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_DOWN 
+					|| e.keyCode == SWT.ARROW_LEFT || 
+							e.keyCode == SWT.ARROW_RIGHT || e.keyCode == 119 
+							|| e.keyCode == 115 || e.keyCode == 97 || 
 							e.keyCode == 100) {
 
 						if (e.keyCode == SWT.ARROW_UP) {
@@ -475,7 +489,8 @@ public class XTankUI
 								filledCoordsMyTank.clear();
 								fillCoords(x,y, "My Tank");
 								
-								if(isObstacleCollision().equals("tank") || isObstacleCollision().equals("both")){
+								if(isObstacleCollision().equals("tank") || 
+								isObstacleCollision().equals("both")){
 									x -= 2 * directionX;
 									y -= 2 * directionY;
 									
@@ -492,7 +507,8 @@ public class XTankUI
 							filledCoordsMyTank.clear();
 							fillCoords(x,y, "My Tank");
 							
-							if(isObstacleCollision().equals("tank") || isObstacleCollision().equals("both")){
+							if(isObstacleCollision().equals("tank") || 
+							isObstacleCollision().equals("both")){
 								x -= 2 * directionX;
 								y -= 2 * directionY;
 							}
@@ -508,7 +524,8 @@ public class XTankUI
 							filledCoordsMyTank.clear();
 							fillCoords(x,y, "My Tank");
 							
-							if(isObstacleCollision().equals("tank") || isObstacleCollision().equals("both")){
+							if(isObstacleCollision().equals("tank") || 
+							isObstacleCollision().equals("both")){
 								x = x - (2 * directionX);
 							}
 							
@@ -523,7 +540,8 @@ public class XTankUI
 							filledCoordsMyTank.clear();
 							fillCoords(x,y, "My Tank");
 							
-							if(isObstacleCollision().equals("tank") || isObstacleCollision().equals("both")){
+							if(isObstacleCollision().equals("tank") || 
+							isObstacleCollision().equals("both")){
 								x -= 2 * directionX;
 								y -= 2 * directionY;
 							}
@@ -547,7 +565,8 @@ public class XTankUI
 
 						try {
 							
-							out.println("ID: " + id + " X: " + x + " Y: " + y + " D: " + tankDirection + " M: " + tankModel);
+							out.println("ID: " + id + " X: " + x + " Y: " + y + 
+							" D: " + tankDirection + " M: " + tankModel);
 						}
 						catch(Exception ex) {
 							System.out.println("The server did not respond (write KL).");
@@ -685,14 +704,16 @@ public class XTankUI
 						}
 						
 						
-						out.println("ID: " + id + " X: " + XTankUI.this.x + " Y: " + XTankUI.this.y + " D: " + tankDirection+ " M: " + 1);
+						out.println("ID: " + id + " X: " + XTankUI.this.x + " Y: " +
+						 XTankUI.this.y + " D: " + tankDirection+ " M: " + 1);
 						canvas.redraw();
 						
 					}
 
 					else if (status.equals("ID:") && id != tmpid && (!enemyTanks.containsKey(tmpid)))
 					{
-						out.println("ID: " + id + " X: " + XTankUI.this.x + " Y: " + XTankUI.this.y + " D: " + tankDirection+ " M: " + XTankUI.this.tankModel);	
+						out.println("ID: " + id + " X: " + XTankUI.this.x + " Y: " + 
+						XTankUI.this.y + " D: " + tankDirection+ " M: " + XTankUI.this.tankModel);	
 						enemyTanks.put(tmpid, new Integer [] {x, y, d});
 						canvas.redraw();
 						
@@ -754,132 +775,6 @@ public class XTankUI
 //			display.asyncExec(this);
 		}
 	};	
-	
-	
-	 class Bullet{
-		 
-		 private int x;
-		 private int y;
-		 private int id;
-		 private int bulletModel;
-		 private int direction;
-		 
-		
-		 public Bullet(int x, int y, int id, int direction, int bulletModel) {
-			 this.x = x;
-			 this.bulletModel = bulletModel;
-			 this.y =y;
-			 this.id = id; 
-			 this.direction = direction;
-		 }
-		 
-		 public int getX() {
-			 return x; 
-		 }
-		 
-		 public int getY() {
-			 return y; 
-		 }
-		 
-		 public int getId() {
-			 return id; 
-		 }
-
-		 public int getDirection() {
-			 return direction; 
-		 }
-
-		 public int getBulletModel() {
-			 return bulletModel; 
-		 }
-
-		 public double getDamage() {
-			 return bulletModel == 1 ? 1 : 1.5;
-		 }
-
-		 public void setDirection(int direction) {
-			 this.direction = direction;
-			 if (direction == 0) {
-				 this.y = this.y - 10;
-			 }
-			 else if (direction == 1) {
-				this.y = this.y + 150;
-			 }
-			 else if (direction == 2) {
-				 this.y = this.y + 75;
-				 this.x = this.x - 50;
-			 }
-			 else if (direction == 3) {
-				this.y = this.y + 75;
-				this.x = this.x + 50;
-			 } 
-		 }
-		 
-		 public void incrementY() {
-			 // based on direction change x and y	
-			 if (direction == 0) {
-				 y -= bulletModel == 1 ? 10 : 5;
-			 }
-			 else if (direction == 1) {
-				 y += bulletModel == 1 ? 10 : 5;
-			 }
-			 else if (direction == 2) {
-				 x -= bulletModel == 1 ? 10 : 5;
-			 }
-			 else if (direction == 3) {
-				 x += bulletModel == 1 ? 10 : 5;
-			 }
-
-		 }
-		 
-		 
-	}
-	 
-	class Coordinate{
-		private int coordinates [] = new int [2];
-		
-		public Coordinate(int x, int y) {
-			 this.coordinates[0] = x;
-			 this.coordinates[1] = y;
-		 }
-		
-		 
-		 public int[] getCoord() {
-			 return coordinates; 
-		 }
-		 
-		 public void setCoord(int x, int y) {
-			 this.coordinates[0] = x;
-			 this.coordinates[1] = y;
-		 }
-		 
-		 @Override
-		 public int hashCode() {
-			 
-			    int result = Arrays.hashCode(coordinates);
-			    return result;
-		 }
-		 
-		 @Override 
-		 public boolean equals(Object o) {
-			 
-			 
-			 if(!(o instanceof Coordinate)) {
-				 return false;
-			 }
-			 
-			 Coordinate x = (Coordinate) o;
-		
-			 if(this.coordinates[0] == x.getCoord()[0] && 
-					 this.coordinates[1] == x.getCoord()[1]) {
-				 return true;
-			 }
-			
-			 return false;
-		 }
-		 
-		
-	}
 }
 
 

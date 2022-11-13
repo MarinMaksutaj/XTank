@@ -29,16 +29,13 @@ public class XTankServer
         {
             System.out.println("The XTank server is running...");
             var pool = Executors.newFixedThreadPool(20);
-            Game game = new Game();
+            Game game = Game.getInstance();
             
             while (accept) 
             {
             	
             	Socket socket = listener.accept();
-                Player player = new Player("Test", 0, (int)(Math.random()*1000));
-                game.addPlayer(player);
-                
-                pool.execute(new XTankManager(socket, player, game));
+                pool.execute(new XTankManager(socket, game));
                 
             }
         }
@@ -47,13 +44,11 @@ public class XTankServer
     private static class XTankManager implements Runnable 
     {
         private Socket socket;
-        private Player currentPlayer;
         private Game game;
 
-        XTankManager(Socket socket, Player player, Game game) 
+        XTankManager(Socket socket, Game game) 
         {
             this.socket = socket;
-            this.currentPlayer = player;
             this.game = game;
         }
 
@@ -68,14 +63,12 @@ public class XTankServer
                 Scanner scanner = new Scanner(in);
                 PrintWriter outWriter = new PrintWriter(socket.getOutputStream(), true);
                 sq.add(out);
-                int currid = currentPlayer.getID();
+                int currid = (int)(Math.random()*1000);
                 int randX = (int)(Math.random()*500);
                 int randY = (int)(Math.random()*500);
-                currentPlayer.setX(randX);
-                currentPlayer.setY(randY);
                 
-                
-                outWriter.println("YOURID: " + currid + " X: " + randX + " Y: " + randY + " D: " + 0 + " M: " + 1 +" " + game.getMaxHealth() + " " + game.getMap());
+                outWriter.println("YOURID: " + currid + " X: " + randX + " Y: " + randY + 
+                " D: " + 0 + " M: " + 1 +" " + game.getMaxHealth() + " " + game.getMap());
               
                               
                 while (true)
@@ -110,94 +103,4 @@ public class XTankServer
             }
         }
     }
-
-    // implement the Player class here
-
-    private static class Player 
-    {
-        private String name;
-        private int score;
-        private int id;
-        private int x;
-        private int y;
-
-        public Player(String name, int score, int id) 
-        {
-            this.name = name;
-            this.score = score;
-            this.id = id;
-        }
-
-        public String getName() { return name; }
-        public int getScore() { return score; }
-        public int getID() { return id; }
-        public int getX() { return x; }
-        public int getY() { return y; }
-        public void setX(int x) { this.x = x; }
-        public void setY(int y) { this.y = y; }
-    }
-
-    private static class Game 
-    {
-        private List<Player> players;
-        
-        String map;
-        
-        int maxHealth;
-
-        public Game() 
-        {
-            players = new ArrayList<>();
-            
-            int randMap = (int)(Math.random()*500);
-			
-			if(randMap% 4 == 0) {
-				map = "MAP3";
-			} else if(randMap% 3 == 0) {
-				map = "MAP2";
-			}
-			else if(randMap% 2 == 0) {
-				map = "MAP1";
-			}else {
-				map = "MAP1";
-			}
-			
-			int randHealth = (int)(Math.random()*500);
-			
-			if(randHealth% 2 == 0) {
-				maxHealth = 5;
-			} else {
-				maxHealth = 3;
-			}
-        }
-
-        public void addPlayer(Player player) 
-        {
-            players.add(player);
-        }
-
-        public void removePlayer(Player player) 
-        {
-            players.remove(player);
-        }
-
-        public List<Player> getPlayers() 
-        {
-            return players;
-        }
-        
-        public int getMaxHealth() 
-        {
-            return maxHealth;
-        }
-        
-        public String getMap() 
-        {
-            return map;
-        }
-    }
-
-
-
-    
 }
