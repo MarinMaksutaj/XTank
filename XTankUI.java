@@ -215,7 +215,7 @@ public class XTankUI
         shell.setSize(800,850);
         
         healthText = new Text(shell, SWT.READ_ONLY | SWT.BORDER);
-        healthText.setText("Health: " + health);
+        healthText.setText("Health: " + health + "     ");
         healthText.setForeground(display.getSystemColor(SWT.COLOR_GREEN));
         
         Composite upperComp = new Composite(shell, SWT.NO_FOCUS);
@@ -364,7 +364,7 @@ public class XTankUI
 				
 				else if((isBulletCollision().equals("mine") || isBulletCollision().equals("both") ))  {
 					health -= bullet.getDamage();
-					healthText.setText("Health: "+health);
+					healthText.setText("Health: "+ health  + "     ");
 					enemyBulletsList.remove(i);
 
 					if(health<=0) {
@@ -649,7 +649,7 @@ public class XTankUI
 						tankDirection = d;
 						map = parts[parts.length - 1];
 						health = Integer.parseInt(parts[parts.length - 2]);
-						healthText.setText("Health: "+health);
+						healthText.setText("Health: "+health  + "     ");
 						
 						filledCoordsMyTank.clear();
 						fillCoords(x,y, "My Tank");
