@@ -1,3 +1,9 @@
+
+/*
+*  Course: CSC335
+*  Description: This is the server class for the game. It creates the game
+*  and starts the game loop.
+*/
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
@@ -13,46 +19,52 @@ import java.util.Map;
 import java.util.Scanner;
 
 /**
- * When a client connects, a new thread is started to handle it.
+ * Class that represents the server for the game.
  */
-public class XTankServer 
-{
+public class XTankServer {
 	static ArrayList<DataOutputStream> sq;
-	static boolean accept = true; 
-	
-    public static void main(String[] args) throws Exception 
-    {
+	static boolean accept = true;
+
+	/**
+	 * Main method for the server. Author: Marin Maksutaj
+	 */
+	public static void main(String[] args) throws Exception {
 		System.out.println(InetAddress.getLocalHost());
 		sq = new ArrayList<>();
-		
-        try (var listener = new ServerSocket(59895)) 
-        {
-            System.out.println("The XTank server is running...");
-            var pool = Executors.newFixedThreadPool(20);
-            Game game = Game.getInstance();
-            
-            while (accept) 
-            {
-            	
-            	Socket socket = listener.accept();
-                pool.execute(new XTankManager(socket, game));
-                
-            }
-        }
-    }
 
-    private static class XTankManager implements Runnable 
-    {
-        private Socket socket;
-        private Game game;
+		try (var listener = new ServerSocket(59895)) {
+			System.out.println("The XTank server is running...");
+			var pool = Executors.newFixedThreadPool(20);
+			Game game = Game.getInstance();
 
-        XTankManager(Socket socket, Game game) 
-        {
-            this.socket = socket;
-            this.game = game;
-        }
+			while (accept) {
+				Socket socket = listener.accept();
+				pool.execute(new XTankManager(socket, game));
+
+			}
+		}
+	}
+
+	/**
+	 * Class that manages the client connections.
+	 */
+	private static class XTankManager implements Runnable {
+		private Socket socket;
+		private Game game;
+
+		/**
+		 * Constructor for the XTankManager class. Author: Shyambhavi
+		 */
+		XTankManager(Socket socket, Game game) {
+			this.socket = socket;
+			this.game = game;
+		}
+
 
         @Override
+		/*
+		 * Method that runs the server side of the game. Author: Marin Maksutaj
+		 */
         public void run() 
         {
             System.out.println("Connected: " + socket);
@@ -136,4 +148,6 @@ public class XTankServer
             }
         }
     }
-}
+
+		
+		}

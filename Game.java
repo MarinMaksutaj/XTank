@@ -1,5 +1,10 @@
 import java.util.*;
 
+/*
+*  Course: CSC335
+*  Description: Helper class that keeps track of the game state.
+*  It uses the singleton design pattern.
+*/
 public class Game 
     {        
         String map;
@@ -7,6 +12,11 @@ public class Game
         static Game instance;
         static List<Player> players;
 
+
+        /*
+         * Getter for the instance of the game.
+         * Author: Marin Maksutaj
+         */
         public static Game getInstance() {
             if (instance == null) {
                 instance = new Game();
@@ -14,13 +24,17 @@ public class Game
             return instance;
         }
 
+        /*
+         * Constructor for the game class.
+         * Author: Shyambhavi
+         */
         private Game() 
         {            
             int randMap = (int)(Math.random()*500);
             
             players = new ArrayList<>();
 			
-			if(randMap% 4 == 0) {
+			if (randMap% 4 == 0) {
 				map = "MAP3";
 			} else if(randMap% 3 == 0) {
 				map = "MAP2";
@@ -66,11 +80,19 @@ public class Game
         	players.remove(p);
         }
         
+        /*
+         * Getter for the max health of the tank.
+         * Author: Marin Maksutaj
+         */
         public int getMaxHealth() 
         {
             return maxHealth;
         }
         
+        /*
+         * Getter for the map.
+         * Author: Shyambhavi
+         */
         public String getMap() 
         {
             return map;
