@@ -1,4 +1,8 @@
-
+/*
+*  Course: CSC335
+*  Description: UI class for the XTank game. It is responsible for fetching the game
+ 				state from the server and displaying it to the user.
+*/
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.layout.*;
@@ -19,9 +23,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Scanner;
 
+/*
+* The XTankUI class is responsible for fetching the messages from 
+the server and displaying the game state to the user.
+*/
 public class XTankUI
 {
-	// The location and direction of the "tank"
 	private int x = 300;
 	private int y = 500;
 	private double health;
@@ -40,12 +47,14 @@ public class XTankUI
 	private Set<Coordinate> filledCoordsBullet;
 	private Set<Coordinate> filledCoordsObstacles;
 	Text healthText;
-	// keep track of the tank direction
-	private int tankDirection = 0; // 0 = up, 1 = right, 2 = down, 3 = left
+	private int tankDirection = 0; 
 	
 	DataInputStream in; 
 	PrintWriter out;
 	
+	/*
+	 * Constructor for the XTankUI class.
+	 */
 	public XTankUI(DataInputStream in, DataOutputStream out, String map)
 	{
 		this.in = in;
@@ -64,6 +73,10 @@ public class XTankUI
 		
 	}
 
+	/*
+	 * Helper function that computes the direction of each bullet based on the tank's direction.
+	 * Author: Marin Maksutaj
+	 */
 	private int getBulletDirection(Bullet bullet) {
 		// look at the bullet's id and return the direction of the tank that fired it
 		int id = bullet.getId();
@@ -80,6 +93,10 @@ public class XTankUI
 		return -1;
 	}
 	
+	/*
+	 * Helper function that fills the coordinates of the tanks and obstacles.
+	 * Author: Shyambhavi
+	 */
 	private void fillCoords(int x, int y, String type) {
 		
 		if(type.equals("Tank")) {
@@ -136,6 +153,10 @@ public class XTankUI
 		
 	}
 	
+	/*
+	 * Helper function that checks if there is a bullet collision.
+	 * Author: Shyambhavi
+	 */
 	public String isBulletCollision() {
 			
 		 	boolean enemyCollision = false;
@@ -152,7 +173,6 @@ public class XTankUI
 		 		
 		 	}
 		 	
-		 	
 		 	if(enemyCollision && myCollision) {
 		 		return "both";
 		 	} else if(enemyCollision) {
@@ -166,6 +186,10 @@ public class XTankUI
 			
 		}
 	
+	/*
+	 * Helper function that checks if there is an obstacle collision.
+	 * Author: Marin Maksutaj
+	 */
 	public String isObstacleCollision() {
 			
 			boolean tankCollision = false;
@@ -202,6 +226,10 @@ public class XTankUI
 	}
 
 	
+	/*
+	 * Start method used to start the game.
+	 * Author: Shyambhavi
+	 */
 	public void start()
 	{
 		System.out.println("Testingg");
@@ -242,7 +270,7 @@ public class XTankUI
 			
 			event.gc.fillRectangle(canvas.getBounds());
 			this.filledCoordsMyTank.clear();
-			
+			// check which map has been set by the server and draw the map
 			if(map.equals("MAP1")) {
 				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 				event.gc.fillRectangle(100,100, 50, 200);
@@ -265,7 +293,6 @@ public class XTankUI
 			}
 			
 			if(health>0) {
-				
 				event.gc.setBackground(shell.getDisplay().getSystemColor(tankModel == 1 ? 
 				SWT.COLOR_DARK_GREEN : SWT.COLOR_BLUE));
 				event.gc.fillRectangle(x, y, 50, 100);
@@ -276,24 +303,17 @@ public class XTankUI
 				if(tankDirection == 0) {
 					event.gc.drawLine(x+25, y+25, x+25, y-25);
 				} else if(tankDirection == 1) {
-					// down
 					event.gc.drawLine(x+25, y+75, x+25, y+125);
 				} else if(tankDirection == 2) {
-					// draw line to the left
 					event.gc.drawLine(x, y + 50, x - 25, y + 50);
 				} else if(tankDirection == 3) {
-					// draw line to the right
 					event.gc.drawLine(x+50, y+50, x+75, y+50);
 				}
 				
 				
 				fillCoords(x,y, "My Tank");
 				
-			}
-			
-	
-			// draw the enemy tanks
-			
+			}			
 			this.filledCoordsEnemyTank.clear();
 			
 			for (Integer[] enemyTank : enemyTanks.values())
@@ -308,15 +328,12 @@ public class XTankUI
 					event.gc.drawLine(enemyTank[0]+25, enemyTank[1]+25, enemyTank[0]+25, 
 					enemyTank[1]-25);
 				} else if(enemyTank[2] == 1) {
-					// down
 					event.gc.drawLine(enemyTank[0]+25, enemyTank[1]+75, enemyTank[0]+25, 
 					enemyTank[1]+125);
 				} else if(enemyTank[2] == 2) {
-					// draw line to the left
 					event.gc.drawLine(enemyTank[0], enemyTank[1] + 50, enemyTank[0] - 25, 
 					enemyTank[1] + 50);
 				} else if(enemyTank[2] == 3) {
-					// draw line to the right
 					event.gc.drawLine(enemyTank[0]+50, enemyTank[1]+50, enemyTank[0]+75, 
 					enemyTank[1]+50);
 				}
@@ -345,20 +362,11 @@ public class XTankUI
 					} 
 					
 					else {
-						
-						
-
 						event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 						event.gc.fillRectangle( bullet.getX(), bullet.getY(), 10, 10);
-		
 					}
-					
-					
-					
 				}
-				
 			}
-			
 			
 			for (int i = 0; i < enemyBulletsList.size(); i++) {
 				
@@ -392,32 +400,19 @@ public class XTankUI
 				}
 				
 				else {
-					
-					
-					
 					event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_RED));
 					event.gc.fillRectangle( bullet.getX(), bullet.getY(), 10, 10);
-					
-					
-					
 					if(health<=0) {
 						healthText.setText("GAME OVER");
 						out.println("REMOVE: "+this.id + " X: -100 Y: -100 D: -1 M: -1");
 						
 					}
 				}
-				
-				
-				
+
 			}
-			
-			
-			
-	
 		}	
 		);	
 		
-
 		canvas.addMouseListener(new MouseListener() {
 			public void mouseDown(MouseEvent e) {
 				System.out.println("mouseDown in canvas");
@@ -466,11 +461,6 @@ public class XTankUI
 		                        });
 		                    }
 		                },0,50);
-											
-						
-						
-						
-						
 					} 
 					
 					else if(e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_DOWN 
@@ -495,7 +485,6 @@ public class XTankUI
 									y -= 2 * directionY;
 									
 								}
-	
 							
 						} else if (e.keyCode == SWT.ARROW_DOWN) {
 							
@@ -512,8 +501,6 @@ public class XTankUI
 								x -= 2 * directionX;
 								y -= 2 * directionY;
 							}
-							
-							
 						} else if (e.keyCode == SWT.ARROW_LEFT) {
 							
 							directionX = tankModel == 1 ? -15 : -5;
@@ -528,7 +515,6 @@ public class XTankUI
 							isObstacleCollision().equals("both")){
 								x = x - (2 * directionX);
 							}
-							
 							
 						} else if (e.keyCode == SWT.ARROW_RIGHT) {
 					
@@ -547,7 +533,6 @@ public class XTankUI
 							}
 							
 						} 
-
 						// check if keys are wasd, and if so, change direction
 						else if (e.keyCode == 119) {
 							System.out.println("W was pressed");
@@ -562,7 +547,6 @@ public class XTankUI
 							tankDirection = 3;
 						}
 
-
 						try {
 							
 							out.println("ID: " + id + " X: " + x + " Y: " + y + 
@@ -575,11 +559,6 @@ public class XTankUI
 						canvas.redraw();}
 					
 				}
-				
-				
-				
-
-				
 			}
 			public void keyReleased(KeyEvent e) {}
 		});
@@ -588,23 +567,18 @@ public class XTankUI
 		Menu menuBar = new Menu(shell, SWT.BAR);
 		shell.setMenuBar(menuBar);
 
-		// create a menu item
 		MenuItem modelItem = new MenuItem(menuBar, SWT.CASCADE);
 		modelItem.setText("Tank Models");
 
-		// create a menu
 		Menu modelMenu = new Menu(shell, SWT.DROP_DOWN);
 		modelItem.setMenu(modelMenu);
 
-		// add a model to the menu
 		MenuItem model1 = new MenuItem(modelMenu, SWT.PUSH);
 		model1.setText("Model 1");
 
-		// add a model to the menu
 		MenuItem model2 = new MenuItem(modelMenu, SWT.PUSH);
 		model2.setText("Model 2");
 
-		// set the selection listener for the menu items
 		model1.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				tankModel = 1;
@@ -630,12 +604,20 @@ public class XTankUI
 		display.dispose();		
 	}
 	
+	/*
+	 * Runner class that is used to communicate with the server and read the
+	 * messages coming from the server.
+	 */
 	class Runner implements Runnable
 	{
+
+		/*
+		 * Run method implemented from the Runnable interface. This method is
+		 * called by the display.timerExec() method.
+		 * Author: Marin Maksutaj
+		 */
 		public void run() 
-		{
-			
-							
+		{		
 			try {
 				if (in.available() > 0) {
 					Scanner sin = new Scanner(in);
@@ -645,11 +627,6 @@ public class XTankUI
 						return;
 					}
 					System.out.println(line);
-					
-					
-					// update tank location
-					// current format: "YOURID: 1 X: 300 Y: 500 D: 0"
-					// or "ENEMYID: 1 X: 300 Y: 500 D: 0"
 
 					String[] parts = line.split(" ");
 					String status = parts[0];
@@ -772,7 +749,6 @@ public class XTankUI
 				System.out.println(ex);
 			}				
             display.timerExec(1, this);
-//			display.asyncExec(this);
 		}
 	};	
 }
