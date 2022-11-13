@@ -1,4 +1,3 @@
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
@@ -8,7 +7,9 @@ import java.net.InetAddress;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -17,7 +18,6 @@ import java.util.Scanner;
 public class XTankServer 
 {
 	static ArrayList<DataOutputStream> sq;
-
 	
     public static void main(String[] args) throws Exception 
     {
@@ -31,8 +31,13 @@ public class XTankServer
             Game game = new Game();
             while (true) 
             {
+            	
+            	Socket socket = listener.accept();
                 Player player = new Player("Test", 0, (int)(Math.random()*1000));
-                pool.execute(new XTankManager(listener.accept(), player, game));
+                game.addPlayer(player);
+                
+                pool.execute(new XTankManager(socket, player, game));
+
             }
         }
     }
@@ -71,15 +76,16 @@ public class XTankServer
                 {
 					if (in.available() > 0) {
                         String line = scanner.nextLine();
+                        System.out.println(line);
+                         
                 	for (DataOutputStream o: sq)
                 	{
                 		PrintWriter outWriter2 = new PrintWriter(o, true);
-    						outWriter2.println(line);
-                	}
+    					outWriter2.println(line);
+        		
                     }
-					
                 }
-            } 
+            } }
             catch (Exception e) 
             {
                 System.out.println("Error:" + socket);
@@ -148,5 +154,3 @@ public class XTankServer
 
     
 }
-
-
