@@ -23,12 +23,13 @@ public class XTankUI
 	// The location and direction of the "tank"
 	private int x = 300;
 	private int y = 500;
-	private int health = 3;
+	private double health = 3;
 	private int id;
 	private String map;
 	private Map<Integer, Integer[]> enemyTanks;
 	private int directionX = 0;
 	private int directionY = -10;
+	private int tankModel;
 	private Canvas canvas;
 	private Display display;
 	private List<Bullet> bulletsList;
@@ -57,6 +58,7 @@ public class XTankUI
 		this.filledCoordsBullet = new HashSet<>();
 		this.filledCoordsObstacles = new HashSet<>();
 		this.tankDirection = 0;
+		this.tankModel = 1;
 		this.map = map;
 		
 		if(map.equals("MAP2")) {
@@ -229,7 +231,7 @@ public class XTankUI
 			
 			if(health>0) {
 				
-				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_DARK_GREEN));
+				event.gc.setBackground(shell.getDisplay().getSystemColor(tankModel == 1 ? SWT.COLOR_DARK_GREEN : SWT.COLOR_BLUE));
 				event.gc.fillRectangle(x, y, 50, 100);
 				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_BLACK));
 				event.gc.fillOval(x, y+25, 50, 50);
@@ -327,9 +329,25 @@ public class XTankUI
 				}
 				
 				else if((isBulletCollision().equals("mine") || isBulletCollision().equals("both") ))  {
-					health--;
+					health -= bullet.getDamage();
 					healthText.setText("Health: "+health);
 					enemyBulletsList.remove(i);
+
+					if(health<=0) {
+						healthText.setText("GAME OVER");
+						out.println("REMOVE: "+this.id + " X: -100 Y: -100 D: -1 M: -1");
+						
+						Button quitButton = new Button(lowerComp, SWT.PUSH);
+				        quitButton.setText("Quit");
+				        quitButton.setSize(60, 50);
+				        quitButton.setForeground(display.getSystemColor(SWT.COLOR_GREEN));
+				        quitButton.addListener(SWT.Selection, new Listener() {
+				            public void handleEvent(Event e) {
+				            	System.exit(0);
+				            }
+				          });
+						
+					}
 				} 
 				
 				else if(!(isBulletCollision().equals("none")) || isObstacleCollision().equals("bullet") || 
@@ -348,7 +366,7 @@ public class XTankUI
 					
 					if(health<=0) {
 						healthText.setText("GAME OVER");
-						out.println("REMOVE: "+this.id + " X: -100 Y: -100 D: -1");
+						out.println("REMOVE: "+this.id + " X: -100 Y: -100 D: -1 M: -1");
 						
 						Button quitButton = new Button(lowerComp, SWT.PUSH);
 				        quitButton.setText("Quit");
@@ -390,13 +408,13 @@ public class XTankUI
 					
 					if(e.keyCode == 32) {
 						
-						Bullet bullet = new Bullet(x + 20, y - 30, id, 0);
+						Bullet bullet = new Bullet(x + 20, y - 30, id, 0, tankModel);
 						int bulletDir = getBulletDirection(bullet);
 						bullet.setDirection(bulletDir);
 						bulletsList.add(bullet);
 						
 						try {
-							out.println("BULLET: "+bullet.getId() + " X: " + bullet.getX() + " Y: " + bullet.getY() + " D: " + bulletDir);
+							out.println("BULLET: "+bullet.getId() + " X: " + bullet.getX() + " Y: " + bullet.getY() + " D: " + bulletDir + " M: " + tankModel);
 						}
 						catch(Exception ex) {
 							System.out.println("The server did not respond (write KL).");
@@ -435,7 +453,7 @@ public class XTankUI
 						if (e.keyCode == SWT.ARROW_UP) {
 							
 								directionX = 0;
-								directionY = -10;
+								directionY = tankModel == 1 ? -15 : -5;
 								x += directionX;
 								y += directionY;
 								
@@ -452,7 +470,7 @@ public class XTankUI
 						} else if (e.keyCode == SWT.ARROW_DOWN) {
 							
 							directionX = 0;
-							directionY = 10;
+							directionY = tankModel == 1 ? 15 : 5;
 							x += directionX;
 							y += directionY;
 							
@@ -467,7 +485,7 @@ public class XTankUI
 							
 						} else if (e.keyCode == SWT.ARROW_LEFT) {
 							
-							directionX = -10;
+							directionX = tankModel == 1 ? -15 : -5;
 							directionY = 0;
 							x += directionX;
 							y += directionY;
@@ -482,7 +500,7 @@ public class XTankUI
 							
 						} else if (e.keyCode == SWT.ARROW_RIGHT) {
 					
-							directionX = 10;
+							directionX = tankModel == 1 ? 15 : 5;
 							directionY = 0;
 							x += directionX;
 							y += directionY;
@@ -514,7 +532,7 @@ public class XTankUI
 
 						try {
 							
-							out.println("ID: " + id + " X: " + x + " Y: " + y + " D: " + tankDirection);
+							out.println("ID: " + id + " X: " + x + " Y: " + y + " D: " + tankDirection + " M: " + tankModel);
 						}
 						catch(Exception ex) {
 							System.out.println("The server did not respond (write KL).");
@@ -530,6 +548,41 @@ public class XTankUI
 				
 			}
 			public void keyReleased(KeyEvent e) {}
+		});
+		
+		// create a menu bar
+		Menu menuBar = new Menu(shell, SWT.BAR);
+		shell.setMenuBar(menuBar);
+
+		// create a menu item
+		MenuItem modelItem = new MenuItem(menuBar, SWT.CASCADE);
+		modelItem.setText("Tank Models");
+
+		// create a menu
+		Menu modelMenu = new Menu(shell, SWT.DROP_DOWN);
+		modelItem.setMenu(modelMenu);
+
+		// add a model to the menu
+		MenuItem model1 = new MenuItem(modelMenu, SWT.PUSH);
+		model1.setText("Model 1");
+
+		// add a model to the menu
+		MenuItem model2 = new MenuItem(modelMenu, SWT.PUSH);
+		model2.setText("Model 2");
+
+		// set the selection listener for the menu items
+		model1.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				tankModel = 1;
+				canvas.redraw();
+			}
+		});
+
+		model2.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				tankModel = 2;
+				canvas.redraw();
+			}
 		});
 
 		System.out.println("testing");				
@@ -566,6 +619,7 @@ public class XTankUI
 					int x = Integer.parseInt(parts[3]);
 					int y = Integer.parseInt(parts[5]);
 					int d = Integer.parseInt(parts[7]);
+					int m = Integer.parseInt(parts[9]);
 					if (status.equals("YOURID:"))
 					{
 						id = tmpid;
@@ -598,7 +652,7 @@ public class XTankUI
 					
 					else if (status.equals("BULLET:") && id != tmpid)
 					{
-						Bullet bullet = new Bullet(x,y,tmpid, d);
+						Bullet bullet = new Bullet(x,y,tmpid, d, m);
 						enemyBulletsList.add(bullet);
 						
 						Timer timer = new Timer();
@@ -645,11 +699,13 @@ public class XTankUI
 		 private int x;
 		 private int y;
 		 private int id;
+		 private int bulletModel;
 		 private int direction;
 		 
 		
-		 public Bullet(int x, int y, int id, int direction) {
+		 public Bullet(int x, int y, int id, int direction, int bulletModel) {
 			 this.x = x;
+			 this.bulletModel = bulletModel;
 			 this.y =y;
 			 this.id = id; 
 			 this.direction = direction;
@@ -669,6 +725,14 @@ public class XTankUI
 
 		 public int getDirection() {
 			 return direction; 
+		 }
+
+		 public int getBulletModel() {
+			 return bulletModel; 
+		 }
+
+		 public double getDamage() {
+			 return bulletModel == 1 ? 1 : 1.5;
 		 }
 
 		 public void setDirection(int direction) {
@@ -692,16 +756,16 @@ public class XTankUI
 		 public void incrementY() {
 			 // based on direction change x and y	
 			 if (direction == 0) {
-				 y -= 10;
+				 y -= bulletModel == 1 ? 10 : 5;
 			 }
 			 else if (direction == 1) {
-				 y += 10;
+				 y += bulletModel == 1 ? 10 : 5;
 			 }
 			 else if (direction == 2) {
-				 x -= 10;
+				 x -= bulletModel == 1 ? 10 : 5;
 			 }
 			 else if (direction == 3) {
-				 x += 10;
+				 x += bulletModel == 1 ? 10 : 5;
 			 }
 
 		 }
