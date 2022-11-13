@@ -152,12 +152,12 @@ public class XTankServer
             int randMap = (int)(Math.random()*500);
 			
 			if(randMap% 4 == 0) {
-				map = "MAP4";
-			} else if(randMap% 3 == 0) {
 				map = "MAP3";
+			} else if(randMap% 3 == 0) {
+				map = "MAP2";
 			}
 			else if(randMap% 2 == 0) {
-				map = "MAP2";
+				map = "MAP1";
 			}else {
 				map = "MAP1";
 			}

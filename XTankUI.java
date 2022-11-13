@@ -242,21 +242,21 @@ public class XTankUI
 			event.gc.fillRectangle(canvas.getBounds());
 			this.filledCoordsMyTank.clear();
 			
-			if(map.equals("MAP2")) {
+			if(map.equals("MAP1")) {
 				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 				event.gc.fillRectangle(100,100, 50, 200);
 				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 				event.gc.fillRectangle(300,500, 300, 50);
 			}
 			
-			if(map.equals("MAP3")) {
+			if(map.equals("MAP2")) {
 				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 				event.gc.fillRectangle(200,600, 400, 50);
 				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 				event.gc.fillRectangle(400,100, 50, 350);
 			}
 			
-			if(map.equals("MAP4")) {
+			if(map.equals("MAP3")) {
 				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 				event.gc.fillRectangle(650,100, 50, 200);
 				event.gc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
@@ -654,20 +654,20 @@ public class XTankUI
 						filledCoordsMyTank.clear();
 						fillCoords(x,y, "My Tank");
 	
-						if(map.equals("MAP2")) {
+						if(map.equals("MAP1")) {
 							
 							fillCoords(100,100,"Obstacle1");
 							fillCoords(300,500,"Obstacle2");
 						}
 						
-						if(map.equals("MAP3")) {
+						if(map.equals("MAP2")) {
 							
 							fillCoords(200,600,"Obstacle3");
 							fillCoords(400,100,"Obstacle4");
 							
 						}
 						
-						if(map.equals("MAP4")) {
+						if(map.equals("MAP3")) {
 							
 							fillCoords(650, 100, "Obstacle1");
 							fillCoords(200, 500, "Obstacle2");
