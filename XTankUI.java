@@ -69,6 +69,22 @@ public class XTankUI {
 		this.tankDirection = 0;
 		this.tankModel = 1;
 		this.map = map;
+		
+		
+		for (int i = 0; i <= 650; i++) {
+			Coordinate toAdd = new Coordinate(0, i);
+			Coordinate toAdd2 = new Coordinate(800, i);
+			filledCoordsObstacles.add(toAdd);
+			filledCoordsObstacles.add(toAdd2);
+		}
+		
+		for (int i = 0; i <= 800; i++) {
+			Coordinate toAdd = new Coordinate(i, 0);
+			Coordinate toAdd2 = new Coordinate(i, 650);
+			filledCoordsObstacles.add(toAdd);
+			filledCoordsObstacles.add(toAdd2);
+		}
+		
 
 	}
 
