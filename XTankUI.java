@@ -655,10 +655,6 @@ public class XTankUI {
 							fillCoords(XTankUI.this.x, XTankUI.this.y, "My Tank");
 						}
 						
-						
-						out.println("ID: " + id + " X: " + XTankUI.this.x + " Y: " +
-						 XTankUI.this.y + " D: " + tankDirection+ " M: " + 1);
-						
 						System.out.println("num "+playersNum);
 						for(int i =0; i < playersNum; i ++) {
 							String l = sin.nextLine();
@@ -683,7 +679,9 @@ public class XTankUI {
 						}
 						System.out.println("Enemy count 1: " + enemyTanks.size());
 						
-					
+						out.println("ID: " + id + " X: " + XTankUI.this.x + " Y: " +
+						 XTankUI.this.y + " D: " + tankDirection+ " M: " + 1);
+	
 						canvas.redraw();
 
 					}

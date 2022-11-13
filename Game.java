@@ -54,10 +54,18 @@ public class Game
 			}
         }
         
+        /*
+         * getting list of players.
+         * Author: Marin Maksutaj
+         */
         public List<Player> getPlayers() {
         	return players;
         }
         
+        /*
+         * getting player by id
+         * Author: Shyambhavi
+         */
         public Player getPlayerById(int x) {
         	for(int i =0; i<players.size();i++) {
         		
@@ -71,11 +79,18 @@ public class Game
         	return null;
         }
         
-        
+        /*
+         * adding new player to list
+         * Author: Marin Maksutaj
+         */
         public void addPlayer(Player p) {
         	players.add(p);
         }
         
+        /*
+         * removing player from list
+         * Author: Shyambhavi
+         */
         public void removePlayer(Player p) {
         	players.remove(p);
         }
