@@ -642,13 +642,13 @@ public class XTankUI
 							fillCoords(XTankUI.this.x, XTankUI.this.y, "My Tank");
 						}
 						
-						out.println("ID: " + id + " X: " + XTankUI.this.x + " Y: " + XTankUI.this.y + " D: " + tankDirection);
+						out.println("ID: " + id + " X: " + XTankUI.this.x + " Y: " + XTankUI.this.y + " D: " + tankDirection+ " M: " + 1);
 						canvas.redraw();
 						
 					}
 					else if (status.equals("ID:") && id != tmpid && (!enemyTanks.containsKey(tmpid)))
 					{
-						out.println("ID: " + id + " X: " + XTankUI.this.x + " Y: " + XTankUI.this.y + " D: " + tankDirection);	
+						out.println("ID: " + id + " X: " + XTankUI.this.x + " Y: " + XTankUI.this.y + " D: " + tankDirection+ " M: " + XTankUI.this.tankModel);	
 						enemyTanks.put(tmpid, new Integer [] {x, y, d});
 						canvas.redraw();
 						
