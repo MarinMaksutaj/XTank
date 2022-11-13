@@ -241,6 +241,14 @@ public class XTankUI {
 		healthText = new Text(shell, SWT.READ_ONLY | SWT.BORDER);
 		healthText.setText("Health: " + health + "     ");
 		healthText.setForeground(display.getSystemColor(SWT.COLOR_GREEN));
+		
+		Text rulesText = new Text(shell, SWT.READ_ONLY | SWT.BORDER);
+		rulesText.setText("\n Use WASD keys to rotate. Use spacebar to fire bullets."
+				+ " Every time the server is started, a random map and set of rules\n"
+				+ " is generated. The maximum health is going to be either 3 or 5"
+				+ " based on the set of rules. Tank Model can be switched by using \n"
+				+ " the drop down in the menu.\n");
+		rulesText.setForeground(display.getSystemColor(SWT.COLOR_WHITE));
 
 		Composite upperComp = new Composite(shell, SWT.NO_FOCUS);
 		Composite lowerComp = new Composite(shell, SWT.NO_FOCUS);
